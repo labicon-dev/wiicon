@@ -39,6 +39,7 @@
 #include "config.h"
 #include "bmi160.h"
 #include "madgwick.h" 
+#include "helpers.h"
 
 int accelMap[3] = {0, 1, 2};
 int accelSign[3] = {1, 1, 1};
@@ -46,78 +47,6 @@ int gyroMap[3] = {0, 1, 2};
 int gyroSign[3] = {1, 1, 1};
 
 unsigned long lastTime = 0;
-
-/**
- * Reads sensor data, applies Madgwick filter and sends Euler angles via Serial
- * Output format: roll,pitch,yaw (in degrees)
- */
-void sendEuler()
-{
-    int16_t ax_raw, ay_raw, az_raw;
-    int16_t gx_raw, gy_raw, gz_raw;
-    
-    // Read accelerometer data
-    if (!readAccelRaw(&ax_raw, &ay_raw, &az_raw))
-    {
-        Serial.println("Failed to read ACC data");
-        return;
-    }
-    
-    // Read gyroscope data
-    if (!readGyroRaw(&gx_raw, &gy_raw, &gz_raw))
-    {
-        Serial.println("Failed to read GYR data");
-        return;
-    }
-
-    // Debug: print raw values if all are zero
-    if (ax_raw == 0 && ay_raw == 0 && az_raw == 0 && gx_raw == 0 && gy_raw == 0 && gz_raw == 0)
-    {
-        Serial.println("Raw sensor values are all zero — check wiring, address, or that sensor is powered.");
-    }
-
-    // Apply axis remapping and sign inversion before converting to physical units
-    int rawA[3] = {ax_raw, ay_raw, az_raw};
-    int rawG[3] = {gx_raw, gy_raw, gz_raw};
-    float a_mapped[3];
-    float g_mapped[3];
-    float bias_mapped[3];
-    
-    for (int i = 0; i < 3; ++i)
-    {
-        a_mapped[i] = (float)rawA[accelMap[i]] * (float)accelSign[i];
-        // Convert accel LSB -> g
-        a_mapped[i] = a_mapped[i] / ACC_LSB_PER_G;
-        g_mapped[i] = (float)rawG[gyroMap[i]] * (float)gyroSign[i];
-        // Bias in deg/s for mapped axis: get raw bias from source axis and apply sign
-        bias_mapped[i] = gyroBiasRaw[gyroMap[i]] * (float)gyroSign[i];
-        // Convert gyro LSB -> deg/s and remove bias
-        g_mapped[i] = g_mapped[i] / GYR_LSB_PER_DPS - bias_mapped[i];
-    }
-
-    // Feed the Madgwick with mapped axes (order: X=0, Y=1, Z=2)
-    MadgwickAHRSupdate(g_mapped[0], g_mapped[1], g_mapped[2], a_mapped[0], a_mapped[1], a_mapped[2]);
-
-    // Convert quaternion to Euler angles (degrees)
-    float roll, pitch, yaw;
-    getEulerAngles(&roll, &pitch, &yaw);
-
-    // Optionally swap roll and yaw before sending
-#if SWAP_ROLL_YAW
-    float outRoll = yaw;
-    float outYaw = roll;
-#else
-    float outRoll = roll;
-    float outYaw = yaw;
-#endif
-
-    // Send CSV: roll,pitch,yaw
-    Serial.print(outRoll, 2);
-    Serial.print(',');
-    Serial.print(pitch, 2);
-    Serial.print(',');
-    Serial.println(outYaw, 2);
-}
 
 void setup()
 {
@@ -194,7 +123,7 @@ void loop()
     sampleFreq = 0.95f * sampleFreq + 0.05f * measuredHz;
     lastTime = now;
 
-        sendEuler();
+        sendEulerAngles();
 
     delay(10);
 #endif
