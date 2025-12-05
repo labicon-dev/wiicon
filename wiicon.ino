@@ -40,6 +40,7 @@
 #include "bmi160.h"
 #include "madgwick.h" 
 #include "helpers.h"
+#include "logger.h"
 
 int accelMap[3] = {0, 1, 2};
 int accelSign[3] = {1, 1, 1};
@@ -52,6 +53,10 @@ void setup()
 {
     Serial.begin(SERIAL_BAUD);
     delay(100);
+
+    Log::init(LOG_LEVEL_DEBUG);
+
+    Log::info("Wiicon Remote Project - Starting setup...");
 
 #ifndef DISABLE_BMI160_SENSOR
     Wire.begin(SDA_PIN, SCL_PIN);
