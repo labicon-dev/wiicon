@@ -61,55 +61,39 @@ void setup()
 #ifndef DISABLE_BMI160_SENSOR
     Wire.begin(SDA_PIN, SCL_PIN);
 
-    Serial.println("Starting BMI160 raw reader (Wire-only). Initializing sensor...");
+    Log::info("Starting BMI160 raw reader (Wire-only). Initializing sensor...");
     
-    // Warn if using GPIO1 which is UART TX0 and may conflict with Serial
     if (SCL_PIN == 1 || SDA_PIN == 1)
     {
-        Serial.println("Warning: using GPIO1 for I2C may conflict with Serial TX (GPIO1). Consider using other pins like 21 (SDA) and 22 (SCL).");
+        Log::warning("Warning: using GPIO1 for I2C may conflict with Serial TX (GPIO1). Consider using other pins like 21 (SDA) and 22 (SCL).");
     }
 
-    // Executa scanner I2C para ajudar a debugar fiação/endereço
     i2cScanner();
 
-    // Inicializa o BMI160
     if (!initBMI160())
     {
-        Serial.println("Warning: failed to init BMI160 (I2C read/write). Verifique conexões e endereço I2C.");
+        Log::warning("Warning: failed to init BMI160 (I2C read/write). Check wiring and I2C address.");
     }
     else
     {
-        Serial.println("BMI160 init attempted (check chip id above).\n");
-        // Auto-calibra acelerômetro após inicialização bem-sucedida
+        Log::info("BMI160 init attempted (check chip id above).\n");
         autoCalibrateAccelerometer();
     }
 
-    // Calibração automática do giroscópio: coleta N amostras com o dispositivo imóvel
-    Serial.println("Iniciando calibração automática do giroscópio. Mantenha o dispositivo imóvel...");
-    
+    Log::info("Starting gyroscope auto-calibration. Keep the device stationary...");
+
     if (!calibrateGyro(CALIB_SAMPLES, CALIB_DELAY_MS))
     {
-        Serial.println("Calibração do giroscópio falhou (leituras I2C). Continuing without bias correction.");
+        Log::error("Gyroscope calibration failed (I2C reads). Continuing without bias correction.");
     }
     else
     {
-        Serial.print("Gyro raw biases (deg/s): ");
-        Serial.print(gyroBiasRaw[0], 4);
-        Serial.print(',');
-        Serial.print(gyroBiasRaw[1], 4);
-        Serial.print(',');
-        Serial.println(gyroBiasRaw[2], 4);
-        
-        // Também imprime biases mapeados de acordo com gyroMap/gyroSign atual
         float mappedBias[3];
         for (int i = 0; i < 3; ++i)
             mappedBias[i] = gyroBiasRaw[gyroMap[i]] * (float)gyroSign[i];
-        Serial.print("Gyro mapped biases (deg/s): ");
-        Serial.print(mappedBias[0], 4);
-        Serial.print(',');
-        Serial.print(mappedBias[1], 4);
-        Serial.print(',');
-        Serial.println(mappedBias[2], 4);
+
+        Log::info("Gyro raw biases (deg/s): %.4f, %.4f, %.4f", gyroBiasRaw[0], gyroBiasRaw[1], gyroBiasRaw[2]);
+        Log::info("Gyro mapped biases (deg/s): %.4f, %.4f, %.4f", mappedBias[0], mappedBias[1], mappedBias[2]);
     }
 #endif
 

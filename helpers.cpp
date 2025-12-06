@@ -42,21 +42,21 @@ void sendEulerAngles()
     // Read accelerometer data
     if (!readAccelRaw(&ax_raw, &ay_raw, &az_raw))
     {
-        Serial.println("Failed to read ACC data");
+        Log::error("Failed to read ACC data");
         return;
     }
     
     // Read gyroscope data
     if (!readGyroRaw(&gx_raw, &gy_raw, &gz_raw))
     {
-        Serial.println("Failed to read GYR data");
+        Log::error("Failed to read GYR data");
         return;
     }
 
     // Debug: print raw values if all are zero
     if (ax_raw == 0 && ay_raw == 0 && az_raw == 0 && gx_raw == 0 && gy_raw == 0 && gz_raw == 0)
     {
-        Serial.println("Raw sensor values are all zero — check wiring, address, or that sensor is powered.");
+        Log::error("Raw sensor values are all zero — check wiring, address, or that sensor is powered.");
     }
 
     // Apply axis remapping and sign inversion before converting to physical units

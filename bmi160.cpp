@@ -70,8 +70,7 @@ bool initBMI160()
         return false;
     if (id != BMI160_CHIP_ID)
     {
-        Serial.print("BMI160 chip id mismatch: 0x");
-        Serial.println(id, HEX);
+        Log::error("BMI160 chip id mismatch: 0x%02X", id);
     }
 
     writeReg(REG_CMD, REG_ACC_NORMAL_MODE);
@@ -95,12 +94,12 @@ bool initBMI160()
 
 void autoCalibrateAccelerometer()
 {
-    Serial.println("Starting accelerometer auto-calibration command (0x37)...");
+    Log::info("Starting accelerometer auto-calibration command (0x37)...");
     writeReg(REG_CMD, 0x37);
     delay(100);
     // Wait extra time to complete the calibration
     delay(1000);
-    Serial.println("Accelerometer auto-calibration command sent.");
+    Log::info("Accelerometer auto-calibration command sent.");
 }
 
 bool calibrateGyro(int samples, int delayMs)
@@ -138,7 +137,7 @@ bool calibrateGyro(int samples, int delayMs)
 
 void i2cScanner()
 {
-    Serial.println("I2C scan:");
+    Log::info("I2C scan:");
     bool found = false;
     for (uint8_t address = 1; address < 127; ++address)
     {
@@ -146,15 +145,12 @@ void i2cScanner()
         uint8_t error = Wire.endTransmission();
         if (error == 0)
         {
-            Serial.print(" - Found device at 0x");
-            if (address < 16)
-                Serial.print('0');
-            Serial.println(address, HEX);
+            Log::info("Found device at 0x%02X", address);
             found = true;
         }
     }
     if (!found)
-        Serial.println(" - No I2C devices found. Check wiring and pull-ups.");
+        Log::info("No I2C devices found. Check wiring and pull-ups.");
 }
 
 bool readAccelRaw(int16_t *ax_raw, int16_t *ay_raw, int16_t *az_raw)
