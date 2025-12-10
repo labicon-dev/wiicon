@@ -20,8 +20,8 @@
 #define WIFI_MANAGER_H
 
 #include <Arduino.h>
-#include <WiFi.h>
 #include <ESPAsyncWebServer.h>
+#include <WiFi.h>
 
 extern const char* PARAM_SSID;
 extern const char* PARAM_PASSWORD;
@@ -45,6 +45,11 @@ extern IPAddress localSubnet;
 extern AsyncWebServer server;
 
 /**
+ * Clear all WiFi config entries
+ */
+void clearNetwork();
+
+/**
  * Setup WiFi Manager
  * Tries to connect to saved WiFi, or starts AP mode for configuration
  */
@@ -56,5 +61,4 @@ void setupWiFiManager();
  */
 bool connectToWiFi();
 
-#endif // WIFI_MANAGER_H
-
+#endif  // WIFI_MANAGER_H

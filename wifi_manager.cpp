@@ -17,9 +17,11 @@
  */
 
 #include "wifi_manager.h"
+
+#include <LittleFS.h>
+
 #include "helpers.h"
 #include "logger.h"
-#include <LittleFS.h>
 
 const char* PARAM_SSID     = "ssid";
 const char* PARAM_PASSWORD = "password";
@@ -42,59 +44,69 @@ IPAddress localSubnet(255, 255, 255, 0);
 
 AsyncWebServer server(80);
 
-void setupWiFiManager()
-{
+void clearNetwork() {
+    writeFile(LittleFS, ssidPath, "");
+    writeFile(LittleFS, passwordPath, "");
+    writeFile(LittleFS, ipPath, "");
+    writeFile(LittleFS, gatewayPath, "");
+};
+
+void setupWiFiManager() {
     ssid     = readFile(LittleFS, ssidPath);
     password = readFile(LittleFS, passwordPath);
     ip       = readFile(LittleFS, ipPath);
     gateway  = readFile(LittleFS, gatewayPath);
 
-    if (connectToWiFi())
-    {
+    if (connectToWiFi()) {
         Log::info("WiFi connected successfully");
         return;
     }
 
     Log::info("Starting WiFi Manager AP...");
-    
+
     WiFi.softAP("Wiicon-Setup", NULL, 1, false, 1);
 
     IPAddress apIP = WiFi.softAPIP();
     Log::info("WiFi Manager AP started. IP: %s", apIP.toString().c_str());
 
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-    {
-        request->send(LittleFS, "/wifi_manager.html", "text/html");
+    server.on("/", HTTP_GET,
+              [](AsyncWebServerRequest* request) { request->send(LittleFS, "/wifi_manager.html", "text/html"); });
+
+    server.on("/scan", HTTP_GET, [](AsyncWebServerRequest* request) {
+        int    n    = WiFi.scanNetworks();
+        String json = "[";
+        for (int i = 0; i < n; i++) {
+            if (i > 0) json += ",";
+            json += "{\"ssid\":\"" + WiFi.SSID(i) + "\",";
+            json += "\"rssi\":" + String(WiFi.RSSI(i)) + ",";
+            json += "\"secure\":" + String(WiFi.encryptionType(i) != WIFI_AUTH_OPEN) + "}";
+        }
+        json += "]";
+        WiFi.scanDelete();
+        request->send(200, "application/json", json);
     });
 
-    server.on("/", HTTP_POST, [](AsyncWebServerRequest *request)
-    {
+    server.on("/", HTTP_POST, [](AsyncWebServerRequest* request) {
         int params = request->params();
-        for (int i = 0; i < params; i++)
-        {
+        for (int i = 0; i < params; i++) {
             const AsyncWebParameter* p = request->getParam(i);
-            if (p->isPost())
-            {
-                if (p->name() == PARAM_SSID)
-                {
+            if (p->isPost()) {
+                if (p->name() == PARAM_SSID) {
                     ssid = p->value();
                     writeFile(LittleFS, ssidPath, ssid.c_str());
                     Log::info("SSID saved: %s", ssid.c_str());
                 }
-                if (p->name() == PARAM_PASSWORD)
-                {
+                if (p->name() == PARAM_PASSWORD) {
                     password = p->value();
                     writeFile(LittleFS, passwordPath, password.c_str());
                     Log::info("Password saved");
                 }
-                if (p->name() == PARAM_IP)
-                {
+                if (p->name() == PARAM_IP) {
                     ip = p->value();
                     writeFile(LittleFS, ipPath, ip.c_str());
                     Log::info("IP saved: %s", ip.c_str());
                 }
-                if (p->name() == PARAM_GATEWAY)
-                {
+                if (p->name() == PARAM_GATEWAY) {
                     gateway = p->value();
                     writeFile(LittleFS, gatewayPath, gateway.c_str());
                     Log::info("Gateway saved: %s", gateway.c_str());
@@ -111,38 +123,36 @@ void setupWiFiManager()
     Log::info("WiFi Manager server started");
 }
 
-bool connectToWiFi()
-{
-    if (ssid.isEmpty() || password.isEmpty())
-    {
+bool connectToWiFi() {
+    if (ssid.isEmpty() || password.isEmpty()) {
         Log::warning("SSID or password is empty");
         return false;
     }
 
     WiFi.mode(WIFI_STA);
 
-    if (!ip.isEmpty() && !gateway.isEmpty())
-    {
+    if (!ip.isEmpty() && !gateway.isEmpty()) {
         localIP.fromString(ip.c_str());
         localGateway.fromString(gateway.c_str());
 
-        if (!WiFi.config(localIP, localGateway, localSubnet))
-        {
+        if (!WiFi.config(localIP, localGateway, localSubnet)) {
             Log::error("Failed to configure static IP");
             return false;
         }
+        Log::info("Using static IP: %s", ip.c_str());
+    } else {
+        WiFi.config(IPAddress(0, 0, 0, 0), IPAddress(0, 0, 0, 0), IPAddress(0, 0, 0, 0));
+        Log::info("Using DHCP for automatic IP assignment");
     }
 
     WiFi.begin(ssid.c_str(), password.c_str());
     Log::info("Connecting to WiFi: %s", ssid.c_str());
 
-    unsigned long startTime = millis();
-    const unsigned long timeout = 10000;
+    unsigned long       startTime = millis();
+    const unsigned long timeout   = 10000;
 
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        if (millis() - startTime >= timeout)
-        {
+    while (WiFi.status() != WL_CONNECTED) {
+        if (millis() - startTime >= timeout) {
             Log::error("WiFi connection timeout");
             return false;
         }
@@ -154,4 +164,3 @@ bool connectToWiFi()
 
     return true;
 }
-
