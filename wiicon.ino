@@ -35,12 +35,7 @@
  * ========================================================================================
  */
 
-#include <Wire.h>
-#include "config.h"
-#include "bmi160.h"
-#include "madgwick.h" 
-#include "helpers.h"
-#include "logger.h"
+#include "wiicon.h"
 
 int accelMap[3] = {0, 1, 2};
 int accelSign[3] = {1, 1, 1};
@@ -52,11 +47,12 @@ unsigned long lastTime = 0;
 void setup()
 {
     Serial.begin(SERIAL_BAUD);
-    delay(100);
 
     Log::init(LOG_LEVEL_DEBUG);
-
     Log::info("Wiicon Remote Project - Starting setup...");
+
+    initLittleFS();
+    setupWiFiManager();
 
 #ifndef DISABLE_BMI160_SENSOR
     Wire.begin(SDA_PIN, SCL_PIN);
@@ -112,7 +108,7 @@ void loop()
     sampleFreq = 0.95f * sampleFreq + 0.05f * measuredHz;
     lastTime = now;
 
-        sendEulerAngles();
+    sendEulerAngles();
 
     delay(10);
 #endif

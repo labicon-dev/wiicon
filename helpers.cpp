@@ -33,6 +33,11 @@
  */
 
 #include "helpers.h"
+#include "config.h"
+#include "bmi160.h"
+#include "madgwick.h"
+#include "logger.h"
+#include <LittleFS.h>
 
 void sendEulerAngles()
 {
@@ -100,4 +105,59 @@ void sendEulerAngles()
     Serial.print(pitch, 2);
     Serial.print(',');
     Serial.println(outYaw, 2);
+}
+
+void initLittleFS()
+{
+    if (!LittleFS.begin(true))
+    {
+        Log::error("Failed to mount LittleFS");
+        return;
+    }
+    Log::info("LittleFS mounted");
+}
+
+String readFile(fs::FS &fs, const char* path)
+{
+    Log::debug("Reading file: %s", path);
+    File file = fs.open(path);
+
+    if (!file || file.isDirectory())
+    {
+        Log::error("Failed to open file: %s", path);
+        return "";
+    }
+
+    String fileContent;
+    while (file.available())
+    {
+        fileContent = file.readStringUntil('\n');
+        break;
+    }
+
+    file.close();
+    return fileContent;
+}
+
+void writeFile(fs::FS &fs, const char* path, const char* message)
+{
+    Log::debug("Writing file: %s", path);
+
+    File file = fs.open(path, FILE_WRITE);
+    if (!file)
+    {
+        Log::error("Failed to open file for writing: %s", path);
+        return;
+    }
+
+    if (file.print(message))
+    {
+        Log::debug("File written successfully: %s", path);
+    }
+    else
+    {
+        Log::error("Failed to write file: %s", path);
+    }
+
+    file.close();
 }

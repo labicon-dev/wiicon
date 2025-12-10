@@ -56,4 +56,4 @@ const int   CALIB_DELAY_MS  = 5;
 // DEBUG ONLY
 #define DISABLE_BMI160_SENSOR 1
 
-#endif
+#endif // CONFIG_H

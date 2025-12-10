@@ -36,15 +36,33 @@
 #define HELPERS_H
 
 #include <Arduino.h>
-
-#include "config.h"
-#include "bmi160.h"
-#include "madgwick.h"
+#include <FS.h>
 
 /**
  * Sends Euler angles via Serial
  * Output format: roll,pitch,yaw (in degrees)
  */
 void sendEulerAngles();
+
+/**
+ * Initialize LittleFS filesystem
+ */
+void initLittleFS();
+
+/**
+ * Read a file from the filesystem
+ * @param fs Filesystem reference (e.g., LittleFS)
+ * @param path Path to the file
+ * @return File content as String
+ */
+String readFile(fs::FS &fs, const char* path);
+
+/**
+ * Write content to a file in the filesystem
+ * @param fs Filesystem reference (e.g., LittleFS)
+ * @param path Path to the file
+ * @param message Content to write
+ */
+void writeFile(fs::FS &fs, const char* path, const char* message);
 
 #endif // HELPERS_H

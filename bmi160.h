@@ -65,6 +65,7 @@
 #include <Wire.h>
 
 #include "config.h"
+#include "logger.h"
 
 const uint8_t REG_CHIP_ID         = 0x00;
 const uint8_t REG_GYR_DATA        = 0x0C;
