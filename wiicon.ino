@@ -52,49 +52,53 @@ void setup() {
 
     initLittleFS();
 
-#ifndef CLEAR_NETWORK_INFO
-    clearNetwork();
-#endif
-
-    setupWiFiManager();
-
-#ifndef DISABLE_BMI160_SENSOR
-    Wire.begin(SDA_PIN, SCL_PIN);
-
-    Log::info("Starting BMI160 raw reader (Wire-only). Initializing sensor...");
-
-    if (SCL_PIN == 1 || SDA_PIN == 1) {
-        Log::warning(
-            "Warning: using GPIO1 for I2C may conflict with Serial TX (GPIO1). Consider using other pins like 21 (SDA) "
-            "and 22 (SCL).");
+    if (CLEAR_NETWORK_INFO) {
+        wifiManager.clearCredentials();
     }
 
-    i2cScanner();
+    wifiManager.begin();
 
-    if (!initBMI160()) {
-        Log::warning("Warning: failed to init BMI160 (I2C read/write). Check wiring and I2C address.");
-    } else {
-        Log::info("BMI160 init attempted (check chip id above).\n");
-        autoCalibrateAccelerometer();
+    if (!DISABLE_BMI160_SENSOR) 
+    {
+        Wire.begin(SDA_PIN, SCL_PIN);
+
+        Log::info("Starting BMI160 raw reader (Wire-only). Initializing sensor...");
+
+        if (SCL_PIN == 1 || SDA_PIN == 1) {
+            Log::warning(
+                "Warning: using GPIO1 for I2C may conflict with Serial TX (GPIO1). Consider using other pins like 21 "
+                "(SDA) "
+                "and 22 (SCL).");
+        }
+
+        i2cScanner();
+
+        if (!initBMI160()) {
+            Log::warning("Warning: failed to init BMI160 (I2C read/write). Check wiring and I2C address.");
+        } else {
+            Log::info("BMI160 init attempted (check chip id above).\n");
+            autoCalibrateAccelerometer();
+        }
+
+        Log::info("Starting gyroscope auto-calibration. Keep the device stationary...");
+
+        if (!calibrateGyro(CALIB_SAMPLES, CALIB_DELAY_MS)) {
+            Log::error("Gyroscope calibration failed (I2C reads). Continuing without bias correction.");
+        } else {
+            float mappedBias[3];
+            for (int i = 0; i < 3; ++i) mappedBias[i] = gyroBiasRaw[gyroMap[i]] * (float)gyroSign[i];
+
+            Log::info("Gyro raw biases (deg/s): %.4f, %.4f, %.4f", gyroBiasRaw[0], gyroBiasRaw[1], gyroBiasRaw[2]);
+            Log::info("Gyro mapped biases (deg/s): %.4f, %.4f, %.4f", mappedBias[0], mappedBias[1], mappedBias[2]);
+        }
     }
-
-    Log::info("Starting gyroscope auto-calibration. Keep the device stationary...");
-
-    if (!calibrateGyro(CALIB_SAMPLES, CALIB_DELAY_MS)) {
-        Log::error("Gyroscope calibration failed (I2C reads). Continuing without bias correction.");
-    } else {
-        float mappedBias[3];
-        for (int i = 0; i < 3; ++i) mappedBias[i] = gyroBiasRaw[gyroMap[i]] * (float)gyroSign[i];
-
-        Log::info("Gyro raw biases (deg/s): %.4f, %.4f, %.4f", gyroBiasRaw[0], gyroBiasRaw[1], gyroBiasRaw[2]);
-        Log::info("Gyro mapped biases (deg/s): %.4f, %.4f, %.4f", mappedBias[0], mappedBias[1], mappedBias[2]);
-    }
-#endif
 
     lastTime = micros();
 }
 
 void loop() {
+    wifiManager.loop();
+
 #ifndef DISABLE_BMI160_SENSOR
     unsigned long now = micros();
     float         dt  = (now - lastTime) / 1000000.0f;

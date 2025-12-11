@@ -20,45 +20,63 @@
 #define WIFI_MANAGER_H
 
 #include <Arduino.h>
+#include <DNSServer.h>
 #include <ESPAsyncWebServer.h>
 #include <WiFi.h>
 
-extern const char* PARAM_SSID;
-extern const char* PARAM_PASSWORD;
-extern const char* PARAM_IP;
-extern const char* PARAM_GATEWAY;
+class WiFiManager {
+   public:
+    static WiFiManager& instance();
 
-extern const char* ssidPath;
-extern const char* passwordPath;
-extern const char* ipPath;
-extern const char* gatewayPath;
+    void begin();
+    void loop();
+    void clearCredentials();
+    bool isInAPMode() const { return _isAPMode; }
+    bool isConnected() const { return WiFi.status() == WL_CONNECTED; }
 
-extern String ssid;
-extern String password;
-extern String ip;
-extern String gateway;
+    WiFiManager(const WiFiManager&)            = delete;
+    WiFiManager& operator=(const WiFiManager&) = delete;
 
-extern IPAddress localIP;
-extern IPAddress localGateway;
-extern IPAddress localSubnet;
+   private:
+    WiFiManager();
+    ~WiFiManager() = default;
 
-extern AsyncWebServer server;
+    bool connect();
+    void startAccessPoint();
+    void setupCaptivePortal();
+    void setupWebServer();
+    void loadCredentials();
+    void saveCredential(const char* path, const String& value);
+    void redirectToCaptivePortal(AsyncWebServerRequest* request);
 
-/**
- * Clear all WiFi config entries
- */
-void clearNetwork();
+    String _ssid;
+    String _password;
+    String _ip;
+    String _gateway;
 
-/**
- * Setup WiFi Manager
- * Tries to connect to saved WiFi, or starts AP mode for configuration
- */
-void setupWiFiManager();
+    IPAddress _localIP;
+    IPAddress _localGateway;
+    IPAddress _localSubnet;
 
-/**
- * Connect to WiFi using saved credentials
- * @return true if connected successfully
- */
-bool connectToWiFi();
+    AsyncWebServer _server;
+    DNSServer      _dnsServer;
+
+    bool _isAPMode;
+
+    static constexpr const char* SSID_PATH     = "/ssid.txt";
+    static constexpr const char* PASSWORD_PATH = "/password.txt";
+    static constexpr const char* IP_PATH       = "/ip.txt";
+    static constexpr const char* GATEWAY_PATH  = "/gateway.txt";
+
+    static constexpr const char* PARAM_SSID     = "ssid";
+    static constexpr const char* PARAM_PASSWORD = "password";
+    static constexpr const char* PARAM_IP       = "ip";
+    static constexpr const char* PARAM_GATEWAY  = "gateway";
+
+    static constexpr uint8_t       DNS_PORT           = 53;
+    static constexpr unsigned long CONNECTION_TIMEOUT = 10000;
+};
+
+extern WiFiManager& wifiManager;
 
 #endif  // WIFI_MANAGER_H
