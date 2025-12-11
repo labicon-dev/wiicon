@@ -26,7 +26,7 @@ WiiCon is an open-source, network-connected motion controller built around the E
 
 ### Planned
 
-- [ ] Network Manager (captive portal for WiFi configuration)
+- [x] Network Manager (captive portal for WiFi configuration)
 - [ ] OSC data transmission over WiFi
 - [ ] Raw and filtered data modes
 - [ ] Button inputs
