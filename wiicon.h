@@ -9,6 +9,7 @@
 #include "helpers.h"
 #include "logger.h"
 #include "wifi_manager.h"
+#include "sleep_manager.h"
 
 void setup();
 void loop();

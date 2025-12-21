@@ -1,6 +1,10 @@
 /**
- * @file        config.h
- * @brief       Configuration file for the Wiicon Remote project
+ * @file        sleep_manager.h
+ * @brief       Deep sleep management for the Wiicon Remote project
+ *
+ * @details     Provides functions for managing ESP32-C6 deep sleep with
+ *              external wakeup via GPIO. Supports LP (Low Power) IO pins
+ *              for waking the chip from deep sleep.
  *
  * @author      See AUTHORS file for full list of contributors
  * @date        2025
@@ -32,36 +36,34 @@
  * ========================================================================================
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef SLEEP_MANAGER_H
+#define SLEEP_MANAGER_H
 
 #include <Arduino.h>
-#include "driver/gpio.h"
 
-const int      SDA_PIN     = 2;
-const int      SCL_PIN     = 1;
-const uint8_t  BMI160_ADDR = 0x68;
-const uint32_t SERIAL_BAUD = 115200;
+/**
+ * Initialize the sleep manager
+ * Configures the wake pin and logs the wakeup cause
+ */
+void initSleepManager();
 
-// Deep Sleep
-const gpio_num_t WAKE_PIN           = GPIO_NUM_0;
-const int        SLEEP_DEBOUNCE_MS  = 1000;
+/**
+ * Enter deep sleep mode
+ * Configures EXT1 wakeup and powers down to deep sleep
+ */
+void goToSleep();
 
-// If true, swap roll and yaw in the serial output (useful if the sensor axes are rotated)
-#define SWAP_ROLL_YAW 0
+/**
+ * Check the wakeup cause and log it
+ * @return true if woken by external button, false otherwise
+ */
+bool checkWakeupCause();
 
-extern int accelMap[3];
-extern int accelSign[3];
-extern int gyroMap[3];
-extern int gyroSign[3];
+/**
+ * Check if the wake button is currently pressed
+ * @return true if button is pressed (HIGH), false otherwise
+ */
+bool isWakeButtonPressed();
 
-const float ACC_LSB_PER_G   = 16384.0f;  // ±2g => LSB/g ≈ 16384
-const float GYR_LSB_PER_DPS = 16.4f;     // ±2000 dps => LSB/(deg/s) ≈ 16.4
-const int   CALIB_SAMPLES   = 200;
-const int   CALIB_DELAY_MS  = 5;
+#endif // SLEEP_MANAGER_H
 
-// DEBUG ONLY
-#define DISABLE_BMI160_SENSOR 0
-#define CLEAR_NETWORK_INFO 0
-
-#endif  // CONFIG_H

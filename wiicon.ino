@@ -47,9 +47,13 @@ unsigned long lastTime = 0;
 void setup() {
     Serial.begin(SERIAL_BAUD);
 
+    // Safety delay so esp doesn't go to sleep too quickly
+    delay(3000);
+
     Log::init(LOG_LEVEL_DEBUG);
     Log::info("Wiicon Remote Project - Starting setup...");
 
+    initSleepManager();
     initLittleFS();
 
     if (CLEAR_NETWORK_INFO) {
@@ -58,8 +62,7 @@ void setup() {
 
     wifiManager.begin();
 
-    if (!DISABLE_BMI160_SENSOR) 
-    {
+    if (!DISABLE_BMI160_SENSOR) {
         Wire.begin(SDA_PIN, SCL_PIN);
 
         Log::info("Starting BMI160 raw reader (Wire-only). Initializing sensor...");
@@ -99,17 +102,23 @@ void setup() {
 void loop() {
     wifiManager.loop();
 
-#ifndef DISABLE_BMI160_SENSOR
-    unsigned long now = micros();
-    float         dt  = (now - lastTime) / 1000000.0f;
-    if (dt <= 0) return;
+    if (isWakeButtonPressed()) {
+        Log::info("Button detected! Sleeping in %d ms...", SLEEP_DEBOUNCE_MS);
+        delay(SLEEP_DEBOUNCE_MS);
+        goToSleep();
+    }
 
-    float measuredHz = 1.0f / dt;
-    sampleFreq       = 0.95f * sampleFreq + 0.05f * measuredHz;
-    lastTime         = now;
+    if (!DISABLE_BMI160_SENSOR) {
+        unsigned long now = micros();
+        float         dt  = (now - lastTime) / 1000000.0f;
+        if (dt <= 0) return;
 
-    sendEulerAngles();
+        float measuredHz = 1.0f / dt;
+        sampleFreq       = 0.95f * sampleFreq + 0.05f * measuredHz;
+        lastTime         = now;
 
-    delay(10);
-#endif
+        sendEulerAngles();
+
+        delay(10);
+    }
 }

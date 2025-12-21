@@ -1,6 +1,6 @@
 /**
- * @file        config.h
- * @brief       Configuration file for the Wiicon Remote project
+ * @file        sleep_manager.cpp
+ * @brief       Implementation of the deep sleep manager for the Wiicon Remote project
  *
  * @author      See AUTHORS file for full list of contributors
  * @date        2025
@@ -32,36 +32,57 @@
  * ========================================================================================
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#include "sleep_manager.h"
+#include "config.h"
+#include "logger.h"
+#include "esp_sleep.h"
 
-#include <Arduino.h>
-#include "driver/gpio.h"
+#define WAKE_BITMASK (1ULL << WAKE_PIN)
 
-const int      SDA_PIN     = 2;
-const int      SCL_PIN     = 1;
-const uint8_t  BMI160_ADDR = 0x68;
-const uint32_t SERIAL_BAUD = 115200;
+void initSleepManager()
+{
+    pinMode(WAKE_PIN, INPUT);
+    
+    Log::info("Sleep manager initialized (wake pin: GPIO%d)", WAKE_PIN);
+    
+    checkWakeupCause();
+}
 
-// Deep Sleep
-const gpio_num_t WAKE_PIN           = GPIO_NUM_0;
-const int        SLEEP_DEBOUNCE_MS  = 1000;
+void goToSleep()
+{
+    Log::info("Entering Deep Sleep...");
+    Serial.flush();
 
-// If true, swap roll and yaw in the serial output (useful if the sensor axes are rotated)
-#define SWAP_ROLL_YAW 0
+    esp_sleep_enable_ext1_wakeup(WAKE_BITMASK, ESP_EXT1_WAKEUP_ANY_HIGH);
 
-extern int accelMap[3];
-extern int accelSign[3];
-extern int gyroMap[3];
-extern int gyroSign[3];
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
 
-const float ACC_LSB_PER_G   = 16384.0f;  // ±2g => LSB/g ≈ 16384
-const float GYR_LSB_PER_DPS = 16.4f;     // ±2000 dps => LSB/(deg/s) ≈ 16.4
-const int   CALIB_SAMPLES   = 200;
-const int   CALIB_DELAY_MS  = 5;
+    esp_deep_sleep_start();
+}
 
-// DEBUG ONLY
-#define DISABLE_BMI160_SENSOR 0
-#define CLEAR_NETWORK_INFO 0
+bool checkWakeupCause()
+{
+    esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
+    
+    switch (cause)
+    {
+        case ESP_SLEEP_WAKEUP_EXT1:
+            Log::info("Wakeup cause: Button pressed (EXT1)");
+            return true;
+            
+        case ESP_SLEEP_WAKEUP_TIMER:
+            Log::info("Wakeup cause: Timer");
+            return false;
+            
+        case ESP_SLEEP_WAKEUP_UNDEFINED:
+        default:
+            Log::info("Wakeup cause: Normal boot / Reset");
+            return false;
+    }
+}
 
-#endif  // CONFIG_H
+bool isWakeButtonPressed()
+{
+    return digitalRead(WAKE_PIN) == HIGH;
+}
+
