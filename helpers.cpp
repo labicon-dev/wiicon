@@ -39,6 +39,7 @@
 #include "logger.h"
 #include "osc_manager.h"
 #include <LittleFS.h>
+#include "led_manager.h"
 
 void sendEulerAngles()
 {
@@ -109,6 +110,7 @@ void sendEulerAngles()
 
     // Send via OSC
     oscManager.sendEulerAngles(outRoll, pitch, outYaw);
+    LedManager::signalOscReady();
 }
 
 void initLittleFS()

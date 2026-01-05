@@ -57,14 +57,8 @@ void setup() {
     Log::init(LOG_LEVEL_DEBUG);
     Log::info("Wiicon Remote Project - Starting setup...");
 
-    LedManager::signalStartup();
-
     initSleepManager();
     initLittleFS();
-
-    if (CLEAR_NETWORK_INFO) {
-        wifiManager.clearCredentials();
-    }
 
     wifiManager.begin();
 

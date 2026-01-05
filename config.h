@@ -48,8 +48,10 @@ const gpio_num_t WAKE_PIN          = GPIO_NUM_0;
 const int        SLEEP_DEBOUNCE_MS = 1000;
 
 // LED Status Indicator
-const int INTERNAL_LED_PIN = 15;
-const bool LED_INVERTED = true;
+const int LED_PIN_R = 18;
+const int LED_PIN_G = 19;
+const int LED_PIN_B = 20;
+const bool LED_RGB_COMMON_ANODE = false;
 
 // OSC Configuration
 constexpr const char* OSC_TARGET_IP     = "192.168.1.255";
