@@ -36,12 +36,12 @@ WiiCon is an open-source, network-connected motion controller built around the E
 
 ## Hardware
 
-| Component | Description |
-|-----------|-------------|
-| **MCU** | ESP32-C6 Super Mini (or compatible ESP32 board) |
-| **IMU** | BMI160 6-axis accelerometer/gyroscope |
-| **Protocol** | I2C (400kHz) |
-| **Power** | 3.3V (USB or LiPo battery) |
+| Component    | Description                                     |
+| ------------ | ----------------------------------------------- |
+| **MCU**      | ESP32-C6 Super Mini (or compatible ESP32 board) |
+| **IMU**      | BMI160 6-axis accelerometer/gyroscope           |
+| **Protocol** | I2C (400kHz)                                    |
+| **Power**    | 3.3V (USB or LiPo battery)                      |
 
 ## Project Structure
 
@@ -63,33 +63,43 @@ All user-adjustable settings are in `config.h`:
 
 ```cpp
 // I2C Pins
-const int SDA_PIN = 2;
-const int SCL_PIN = 1;
+const int SDA_PIN = 4;
+const int SCL_PIN = 2;
 
 // BMI160 I2C Address (0x68 or 0x69)
 const uint8_t BMI160_ADDR = 0x68;
-
-// Serial baud rate
-const uint32_t SERIAL_BAUD = 115200;
 
 // Calibration samples
 const int CALIB_SAMPLES = 200;
 ```
 
-## OSC Protocol (Planned)
+## OSC Protocol
 
-The device will transmit sensor data via OSC over UDP
+The device can transmit sensor data via OSC over UDP to a target IP address and port.
+
+## LED Status Indicators
+
+The RGB LED indicates the current status of the device:
+
+| Color / Pattern          | Meaning                                                                    |
+| :----------------------- | :------------------------------------------------------------------------- |
+| ⚪ **White (Fixed 1s)**   | **Startup.** The system has been turned on.                                |
+| 🟡 **Yellow (Blinking)**  | **WiFi Search.** Trying to connect to the configured network.              |
+| 🟢 **Green (Fixed 2s)**   | **Success.** Connected to WiFi and sensors calibrated.                     |
+| 🔵 **Blue (Flash)**       | **Activity.** Blinks every 2s indicating OSC data transmission.            |
+| 🔴 **Red (Blinking)**     | **Sensor Error.** The BMI160 sensor or I2C communication was not detected. |
+| 🟣 **Magenta (Blinking)** | **Network Error.** Connection timeout exceeded or WiFi not found.          |
 
 ## Authors
 
-- Breno Paz — brenopaz@ufba.br
-- Eduardo Monteiro — eduardo.monteiro@ufba.br
-- Laura Marques — laura.marques@ufba.br
-- Vitor Rizzato — vitormagalhaes@ufba.br
+- Breno Paz — <brenopaz@ufba.br>
+- Eduardo Monteiro — <eduardo.monteiro@ufba.br>
+- Laura Marques — <laura.marques@ufba.br>
+- Vitor Rizzato — <vitormagalhaes@ufba.br>
 
 ## Acknowledgments
 
-This project is developed at **Universidade Federal da Bahia (UFBA)** as part of the final project for the course of **Dispositivos Práticos II**.
+This project is developed at **Universidade Federal da Bahia (UFBA)** as part of the final project for the course of **Dispositivos Tecnológicos Práticos II**.
 
 ### Third-Party Code
 
