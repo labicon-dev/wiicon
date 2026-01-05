@@ -34,9 +34,6 @@
 
 #include "led_manager.h"
 
-#include "config.h"
-#include "logger.h"
-
 void LedManager::begin() {
     pinMode(LED_PIN_R, OUTPUT);
     pinMode(LED_PIN_G, OUTPUT);
@@ -100,13 +97,11 @@ void LedManager::signalErrorSensor() {
     }
 }
 
-void LedManager::signalErrorGeneral() {
-    blink(true, false, true, 3, 300);
-}
+void LedManager::signalErrorGeneral() { blink(true, false, true, 3, 300); }
 
 void LedManager::signalOscReady() {
     static unsigned long lastBlinkTime = 0;
-    static bool isLedOn = false;
+    static bool          isLedOn       = false;
 
     const int interval = 2000;
     const int duration = 100;
@@ -116,7 +111,7 @@ void LedManager::signalOscReady() {
     if (!isLedOn) {
         if (now - lastBlinkTime > interval) {
             setColor(false, false, true);
-            isLedOn = true;
+            isLedOn       = true;
             lastBlinkTime = now;
         }
     } else {

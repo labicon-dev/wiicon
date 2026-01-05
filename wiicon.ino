@@ -36,12 +36,6 @@
  */
 
 #include "wiicon.h"
-#include "led_manager.h"
-
-int accelMap[3]  = {0, 1, 2};
-int accelSign[3] = {1, 1, 1};
-int gyroMap[3]   = {0, 1, 2};
-int gyroSign[3]  = {1, 1, 1};
 
 unsigned long lastTime = 0;
 
@@ -62,68 +56,56 @@ void setup() {
 
     wifiManager.begin();
 
-    if (!DISABLE_BMI160_SENSOR) {
-        Wire.begin(SDA_PIN, SCL_PIN);
+    Wire.begin(SDA_PIN, SCL_PIN);
 
-        Log::info("Starting BMI160 raw reader (Wire-only). Initializing sensor...");
+    Log::info("Starting BMI160 reader. Initializing sensor...");
 
-        if (SCL_PIN == 1 || SDA_PIN == 1) {
-            Log::warning(
-                "Warning: using GPIO1 for I2C may conflict with Serial TX (GPIO1). Consider using other pins like 21 "
-                "(SDA) "
-                "and 22 (SCL).");
-        }
+    I2CScanner();
 
-        i2cScanner();
+    if (!initBMI160Sensor()) {
+        Log::error("Failed to init BMI160 (I2C read/write). Check wiring and I2C address.");
+        LedManager::signalErrorSensor();
+    } else {
+        Log::info("BMI160 initialized successfully (chip id: 0x%02X).", BMI160_CHIP_ID);
+        autoCalibrateAccelerometer();
+        LedManager::signalSuccess();
+    }
 
-        if (!initBMI160()) {
-            Log::warning("Warning: failed to init BMI160 (I2C read/write). Check wiring and I2C address.");
-            LedManager::signalErrorSensor();
-        } else {
-            Log::info("BMI160 init attempted (check chip id above).\n");
-            autoCalibrateAccelerometer();
-            LedManager::signalSuccess();
-        }
+    Log::info("Starting gyroscope calibration. Keep the device stationary...");
 
-        Log::info("Starting gyroscope auto-calibration. Keep the device stationary...");
+    if (!calibrateGyro(CALIB_SAMPLES, CALIB_DELAY_MS)) {
+        Log::error("Gyroscope calibration failed. Continuing without bias correction.");
+        LedManager::signalErrorGeneral();
+    } else {
+        float mappedBias[3];
+        for (int i = 0; i < 3; ++i) mappedBias[i] = gyroBiasRaw[gyroMap[i]] * (float)gyroSign[i];
 
-        if (!calibrateGyro(CALIB_SAMPLES, CALIB_DELAY_MS)) {
-            Log::error("Gyroscope calibration failed (I2C reads). Continuing without bias correction.");
-            LedManager::signalErrorSensor();
-        } else {
-            float mappedBias[3];
-            for (int i = 0; i < 3; ++i) mappedBias[i] = gyroBiasRaw[gyroMap[i]] * (float)gyroSign[i];
-
-            Log::info("Gyro raw biases (deg/s): %.4f, %.4f, %.4f", gyroBiasRaw[0], gyroBiasRaw[1], gyroBiasRaw[2]);
-            Log::info("Gyro mapped biases (deg/s): %.4f, %.4f, %.4f", mappedBias[0], mappedBias[1], mappedBias[2]);
-            LedManager::signalSuccess();
-        }
+        Log::info("Gyroscope calibration successful. Raw biases (deg/s): %.4f, %.4f, %.4f", gyroBiasRaw[0], gyroBiasRaw[1], gyroBiasRaw[2]);
+        Log::info("Gyroscope calibration successful. Mapped biases (deg/s): %.4f, %.4f, %.4f", mappedBias[0], mappedBias[1], mappedBias[2]);
+        LedManager::signalSuccess();
     }
 
     lastTime = micros();
-    LedManager::signalSuccess();
 }
 
 void loop() {
     wifiManager.loop();
 
     if (isWakeButtonPressed()) {
-        Log::info("Button detected! Sleeping in %d ms...", SLEEP_DEBOUNCE_MS);
+        Log::info("Sleep button detected! Sleeping in %d ms...", SLEEP_DEBOUNCE_MS);
         delay(SLEEP_DEBOUNCE_MS);
         goToSleep();
     }
 
-    if (!DISABLE_BMI160_SENSOR) {
-        unsigned long now = micros();
-        float         dt  = (now - lastTime) / 1000000.0f;
-        if (dt <= 0) return;
+    unsigned long now = micros();
+    float         dt  = (now - lastTime) / 1000000.0f;
+    if (dt <= 0) return;
 
-        float measuredHz = 1.0f / dt;
-        sampleFreq       = 0.95f * sampleFreq + 0.05f * measuredHz;
-        lastTime         = now;
+    float measuredHz = 1.0f / dt;
+    sampleFreq       = 0.95f * sampleFreq + 0.05f * measuredHz;
+    lastTime         = now;
 
-        sendEulerAngles();
+    sendEulerAngles();
 
-        delay(10);
-    }
+    delay(10);
 }

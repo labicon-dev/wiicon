@@ -41,6 +41,12 @@
 
 #include <Arduino.h>
 
+#include "config.h"
+#include "esp_sleep.h"
+#include "logger.h"
+
+#define WAKE_BITMASK (1ULL << WAKE_PIN) /**< Wakeup bitmask for the wake pin */
+
 /**
  * Initialize the sleep manager
  * Configures the wake pin and logs the wakeup cause
@@ -65,5 +71,4 @@ bool checkWakeupCause();
  */
 bool isWakeButtonPressed();
 
-#endif // SLEEP_MANAGER_H
-
+#endif  // SLEEP_MANAGER_H

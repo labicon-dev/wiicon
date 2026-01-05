@@ -41,13 +41,21 @@
 #include <Arduino.h>
 #include <WiFiUdp.h>
 
+#include "config.h"
+#include "logger.h"
+#include "wifi_manager.h"
+
 class OSCManager {
    public:
+    /**
+     * Get the singleton instance of the OSC manager
+     * @return Reference to the OSC manager instance
+     */
     static OSCManager& instance();
 
     /**
      * Initialize the OSC manager
-     * @return true if initialization was successful
+     * @return true if initialization as successful
      */
     bool begin();
 
@@ -85,20 +93,37 @@ class OSCManager {
     OSCManager& operator=(const OSCManager&) = delete;
 
    private:
+    /**
+     * Constructor
+     */
     OSCManager();
     ~OSCManager() = default;
 
+    /**
+     * Write a string to the OSC buffer
+     * @param str String to write
+     */
     void writeOSCString(const char* str);
+
+    /**
+     * Write a float value to the OSC buffer
+     */
     void writeOSCFloat(float value);
+
+    /**
+     * Pad the OSC buffer to four bytes
+     */
     void padToFourBytes();
 
-    WiFiUDP  _udp;
-    bool     _initialized;
-    uint8_t  _buffer[256];
-    size_t   _bufferIndex;
+    WiFiUDP _udp;         /**< UDP instance for OSC communication */
+    bool    _initialized; /**< Whether the OSC manager is initialized */
+    uint8_t _buffer[256]; /**< Buffer for the OSC message */
+    size_t  _bufferIndex; /**< Index of the current position in the buffer */
 };
 
+/**
+ * Global instance of the OSC manager
+ */
 extern OSCManager& oscManager;
 
 #endif  // OSC_MANAGER_H
-

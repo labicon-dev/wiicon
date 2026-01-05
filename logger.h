@@ -28,7 +28,11 @@
 #define LOGGER_H
 
 #include <Arduino.h>
+#include <stdarg.h>
 
+/**
+ * Log levels
+ */
 typedef enum {
     LOG_LEVEL_DEBUG    = 0,
     LOG_LEVEL_INFO     = 1,
@@ -39,7 +43,7 @@ typedef enum {
 } LogLevel;
 
 class Log {
-public:
+   public:
     /**
      * Initialize the logger with the minimum log level
      * @param level Minimum log level to display (messages below this are ignored)
@@ -62,35 +66,110 @@ public:
      */
     static void enableTimestamp(bool enable);
 
+    /**
+     * Log a debug message
+     * @param format Format string
+     * @param ... Arguments
+     */
     static void debug(const char* format, ...);
+
+    /**
+     * Log an info message
+     * @param format Format string
+     * @param ... Arguments
+     */
     static void info(const char* format, ...);
+
+    /**
+     * Log a warning message
+     * @param format Format string
+     * @param ... Arguments
+     */
     static void warning(const char* format, ...);
+
+    /**
+     * Log an error message
+     * @param format Format string
+     * @param ... Arguments
+     */
     static void error(const char* format, ...);
+
+    /**
+     * Log a critical message
+     * @param format Format string
+     * @param ... Arguments
+     */
     static void critical(const char* format, ...);
 
+    /**
+     * Log a message with a specific level
+     * @param level Log level
+     * @param format Format string
+     * @param ... Arguments
+     */
     static void log(LogLevel level, const char* format, ...);
 
+    /**
+     * Log a message with a specific level and location
+     * @param level Log level
+     * @param file File name
+     * @param line Line number
+     * @param format Format string
+     * @param ... Arguments
+     */
     static void logWithLocation(LogLevel level, const char* file, int line, const char* format, ...);
 
-private:
+   private:
+    /**
+     * Current log level
+     */
     static LogLevel _level;
+
+    /**
+     * Whether timestamp is enabled
+     */
     static bool _timestampEnabled;
+
+    /**
+     * Buffer for the log message
+     */
     static char _buffer[256];
 
+    /**
+     * Print a log message
+     * @param level Log level
+     * @param file File name
+     * @param line Line number
+     * @param message Message to print
+     */
     static void printLog(LogLevel level, const char* file, int line, const char* message);
+
+    /**
+     * Convert a log level to a string
+     * @param level Log level
+     * @return String representation of the log level
+     */
     static const char* levelToString(LogLevel level);
 };
 
-#define LOG_DEBUG(fmt, ...)    Log::logWithLocation(LOG_LEVEL_DEBUG, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
-#define LOG_INFO(fmt, ...)     Log::logWithLocation(LOG_LEVEL_INFO, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
-#define LOG_WARNING(fmt, ...)  Log::logWithLocation(LOG_LEVEL_WARNING, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
-#define LOG_ERROR(fmt, ...)    Log::logWithLocation(LOG_LEVEL_ERROR, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+/**
+ * Log macros
+ */
+#define LOG_DEBUG(fmt, ...) Log::logWithLocation(LOG_LEVEL_DEBUG, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_INFO(fmt, ...) Log::logWithLocation(LOG_LEVEL_INFO, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_WARNING(fmt, ...) Log::logWithLocation(LOG_LEVEL_WARNING, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_ERROR(fmt, ...) Log::logWithLocation(LOG_LEVEL_ERROR, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #define LOG_CRITICAL(fmt, ...) Log::logWithLocation(LOG_LEVEL_CRITICAL, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
+/**
+ * Disable debug messages
+ * @param fmt Format string
+ * @param ... Arguments
+ */
 #ifdef LOG_DISABLE_DEBUG
-    #define LOG_D(fmt, ...) ((void)0)
+#define LOG_D(fmt, ...) ((void)0)
 #else
-    #define LOG_D(fmt, ...) LOG_DEBUG(fmt, ##__VA_ARGS__)
+#define LOG_D(fmt, ...) LOG_DEBUG(fmt, ##__VA_ARGS__)
 #endif
 
-#endif // LOGGER_H
+#endif  // LOGGER_H

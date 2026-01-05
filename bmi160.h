@@ -1,50 +1,50 @@
 /**
  * @file        bmi160.h
  * @brief       BMI160 IMU driver for the WiiCon project
- * 
+ *
  * @details     Lightweight I2C driver for the Bosch BMI160 6-axis IMU.
  *              Provides initialization, configuration, calibration, and
  *              raw data reading for accelerometer and gyroscope.
- * 
+ *
  * @author      See AUTHORS file for full list of contributors
  * @date        2025
  * @version     1.0.0
- * 
+ *
  * @see         Bosch BMI160 Datasheet:
  *              https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmi160-ds000.pdf
- * 
+ *
  * ========================================================================================
  * DERIVED WORK NOTICE
  * ========================================================================================
- * 
+ *
  * This code is based on the BMI160-Arduino library for Intel(R) Curie(TM) devices:
  * Copyright (c) 2015 Intel Corporation. All rights reserved.
- * 
+ *
  * Which in turn is based on the I2Cdev device library by Jeff Rowberg:
  * https://github.com/jrowberg/i2cdevlib
  * Copyright (c) 2012 Jeff Rowberg
- * 
+ *
  * Register definitions and configuration values are derived from the
  * Bosch BMI160 datasheet (Document revision 1.0, November 2020).
- * 
+ *
  * ========================================================================================
  * LICENSE (MIT)
  * ========================================================================================
- * 
+ *
  * Copyright (c) 2012 Jeff Rowberg (I2Cdev library)
  * Copyright (c) 2015 Intel Corporation (BMI160-Arduino library)
  * Copyright (c) 2025 WiiCon Contributors (this implementation)
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -52,9 +52,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * 
+ *
  * SPDX-License-Identifier: MIT
- * 
+ *
  * ========================================================================================
  */
 
@@ -111,7 +111,7 @@ int16_t toInt16(uint8_t lsb, uint8_t msb);
  * Configures operation modes, ODR and ranges
  * @return true if the initialization was successful
  */
-bool initBMI160();
+bool initBMI160Sensor();
 
 /**
  * Trigger automatic calibration of the accelerometer
@@ -132,7 +132,7 @@ bool calibrateGyro(int samples, int delayMs);
  * I2C scanner for debugging
  * List all devices found on the I2C bus
  */
-void i2cScanner();
+void I2CScanner();
 
 /**
  * Read raw accelerometer data

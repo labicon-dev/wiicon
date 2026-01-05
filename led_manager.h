@@ -35,7 +35,10 @@
 #ifndef LED_MANAGER_H
 #define LED_MANAGER_H
 
+#include <Arduino.h>
+
 #include "config.h"
+#include "logger.h"
 
 class LedManager {
    public:

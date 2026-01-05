@@ -18,12 +18,6 @@
 
 #include "wifi_manager.h"
 
-#include <LittleFS.h>
-
-#include "helpers.h"
-#include "logger.h"
-#include "led_manager.h"
-
 WiFiManager& wifiManager = WiFiManager::instance();
 
 WiFiManager& WiFiManager::instance() {

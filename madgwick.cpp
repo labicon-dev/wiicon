@@ -1,28 +1,28 @@
 /**
  * @file        madgwick.cpp
  * @brief       Implementation of the Madgwick AHRS filter for the Wiicon Remote project
- * 
+ *
  * @details     Based on the public MadgwickAHRS algorithm
- * 
+ *
  * @author      See AUTHORS file for full list of contributors
  * @date        2025
  * @version     1.0.0
- * 
+ *
  * ========================================================================================
- * 
+ *
  * MIT License
  * Copyright (c) 2025 Wiicon Remote Contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,18 +30,20 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * 
+ *
  * ========================================================================================
  */
 
 #include "madgwick.h"
 
-volatile float beta = 0.1f;
-float sampleFreq = 100.0f;
-float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;
+volatile float beta       = 0.1f;
+float          sampleFreq = 100.0f;
+float          q0         = 1.0f;
+float          q1         = 0.0f;
+float          q2         = 0.0f;
+float          q3         = 0.0f;
 
-void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az)
-{
+void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az) {
     float recipNorm;
     float s0, s1, s2, s3;
     float qDot1, qDot2, qDot3, qDot4;
@@ -57,10 +59,8 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
     qDot3 = 0.5f * (q0 * gy - q1 * gz + q3 * gx);
     qDot4 = 0.5f * (q0 * gz + q1 * gy - q2 * gx);
 
-    // Compute feedback only if the accelerometer measurement is valid (non-zero)
-    if (!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f)))
-    {
-        // Normalize the accelerometer measurement
+    // Compute feedback only if the accelerometer measurement is valid
+    if (!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f))) {
         recipNorm = 1.0f / sqrtf(ax * ax + ay * ay + az * az);
         ax *= recipNorm;
         ay *= recipNorm;
@@ -69,6 +69,7 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
         // Auxiliary variables to avoid repetitive arithmetic
         // Optimization: Pre-calculate common products of the quaternion components (q0-q3)
         // to save processing in the gradient descent equations below.
+
         // Ex: _2q0 means "2 times q0", _4q1 means "4 times q1", etc.
         float _2q0 = 2.0f * q0;
         float _2q1 = 2.0f * q1;
@@ -96,14 +97,12 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
         s2 *= recipNorm;
         s3 *= recipNorm;
 
-        // Apply feedback step
         qDot1 -= beta * s0;
         qDot2 -= beta * s1;
         qDot3 -= beta * s2;
         qDot4 -= beta * s3;
     }
 
-    // Integrate the rate of change of the quaternion to get the quaternion
     q0 += qDot1 * (1.0f / sampleFreq);
     q1 += qDot2 * (1.0f / sampleFreq);
     q2 += qDot3 * (1.0f / sampleFreq);
@@ -117,12 +116,11 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
     q3 *= recipNormQ;
 }
 
-void getEulerAngles(float *roll, float *pitch, float *yaw)
-{
+void getEulerAngles(float *roll, float *pitch, float *yaw) {
     // Mathematics to convert the quaternion (q0-q3) to human angles (Roll, Pitch, Yaw)
-    *roll = atan2f(2.0f * (q0 * q1 + q2 * q3), 1.0f - 2.0f * (q1 * q1 + q2 * q2));
+    *roll  = atan2f(2.0f * (q0 * q1 + q2 * q3), 1.0f - 2.0f * (q1 * q1 + q2 * q2));
     *pitch = asinf(2.0f * (q0 * q2 - q3 * q1));
-    *yaw = atan2f(2.0f * (q0 * q3 + q1 * q2), 1.0f - 2.0f * (q2 * q2 + q3 * q3));
+    *yaw   = atan2f(2.0f * (q0 * q3 + q1 * q2), 1.0f - 2.0f * (q2 * q2 + q3 * q3));
 
     // Convert from radians to degrees
     *roll *= 180.0f / PI;
@@ -130,11 +128,9 @@ void getEulerAngles(float *roll, float *pitch, float *yaw)
     *yaw *= 180.0f / PI;
 }
 
-void resetQuaternion()
-{
+void resetQuaternion() {
     q0 = 1.0f;
     q1 = 0.0f;
     q2 = 0.0f;
     q3 = 0.0f;
 }
-

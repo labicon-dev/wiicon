@@ -33,9 +33,6 @@
  */
 
 #include "osc_manager.h"
-#include "config.h"
-#include "logger.h"
-#include "wifi_manager.h"
 
 OSCManager& oscManager = OSCManager::instance();
 
@@ -61,9 +58,7 @@ bool OSCManager::begin() {
     return true;
 }
 
-bool OSCManager::isReady() const {
-    return _initialized && wifiManager.isConnected() && !wifiManager.isInAPMode();
-}
+bool OSCManager::isReady() const { return _initialized && wifiManager.isConnected() && !wifiManager.isInAPMode(); }
 
 void OSCManager::sendEulerAngles(float roll, float pitch, float yaw) {
     if (!isReady()) {
@@ -142,4 +137,3 @@ void OSCManager::padToFourBytes() {
         _buffer[_bufferIndex++] = '\0';
     }
 }
-

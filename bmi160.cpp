@@ -58,7 +58,7 @@ int16_t toInt16(uint8_t lsb, uint8_t msb)
     return (int16_t)((msb << 8) | lsb);
 }
 
-bool initBMI160()
+bool initBMI160Sensor()
 {
     // Soft reset
     writeReg(REG_CMD, 0xB6);
@@ -135,22 +135,22 @@ bool calibrateGyro(int samples, int delayMs)
     return true;
 }
 
-void i2cScanner()
+void I2CScanner()
 {
-    Log::info("I2C scan:");
-    bool found = false;
+    Log::info("I2C scanner: scanning for devices...");
+    bool foundDevices = false;
     for (uint8_t address = 1; address < 127; ++address)
     {
         Wire.beginTransmission(address);
         uint8_t error = Wire.endTransmission();
         if (error == 0)
         {
-            Log::info("Found device at 0x%02X", address);
-            found = true;
+            Log::info("I2C scanner: found device at 0x%02X", address);
+            foundDevices = true;
         }
     }
-    if (!found)
-        Log::info("No I2C devices found. Check wiring and pull-ups.");
+    if (!foundDevices)
+        Log::info("I2C scanner: no devices found. Check wiring and pull-ups.");
 }
 
 bool readAccelRaw(int16_t *ax_raw, int16_t *ay_raw, int16_t *az_raw)
