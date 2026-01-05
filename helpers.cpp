@@ -37,6 +37,7 @@
 #include "bmi160.h"
 #include "madgwick.h"
 #include "logger.h"
+#include "osc_manager.h"
 #include <LittleFS.h>
 
 void sendEulerAngles()
@@ -99,12 +100,15 @@ void sendEulerAngles()
     float outYaw = yaw;
 #endif
 
-    // Send CSV: roll,pitch,yaw
+    // Send via Serial (CSV: roll,pitch,yaw)
     Serial.print(outRoll, 2);
     Serial.print(',');
     Serial.print(pitch, 2);
     Serial.print(',');
     Serial.println(outYaw, 2);
+
+    // Send via OSC
+    oscManager.sendEulerAngles(outRoll, pitch, outYaw);
 }
 
 void initLittleFS()

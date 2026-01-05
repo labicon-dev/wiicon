@@ -10,6 +10,7 @@
 #include "logger.h"
 #include "wifi_manager.h"
 #include "sleep_manager.h"
+#include "osc_manager.h"
 
 void setup();
 void loop();

@@ -22,6 +22,7 @@
 
 #include "helpers.h"
 #include "logger.h"
+#include "led_manager.h"
 
 WiFiManager& wifiManager = WiFiManager::instance();
 
@@ -96,10 +97,16 @@ bool WiFiManager::connect() {
     while (WiFi.status() != WL_CONNECTED) {
         if (millis() - startTime >= CONNECTION_TIMEOUT) {
             Log::error("WiFi connection timeout");
+            LedManager::signalErrorGeneral();
             return false;
         }
-        delay(100);
+        LedManager::signalWifiSearch();
+        delay(10);
     }
+
+    LedManager::signalSuccess();
+    delay(1000);
+    LedManager::off();
 
     Log::info("Connected to WiFi!");
     Log::info("IP address: %s", WiFi.localIP().toString().c_str());

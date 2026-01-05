@@ -36,6 +36,7 @@
  */
 
 #include "wiicon.h"
+#include "led_manager.h"
 
 int accelMap[3]  = {0, 1, 2};
 int accelSign[3] = {1, 1, 1};
@@ -47,11 +48,16 @@ unsigned long lastTime = 0;
 void setup() {
     Serial.begin(SERIAL_BAUD);
 
+    LedManager::begin();
+    LedManager::signalStartup();
+
     // Safety delay so esp doesn't go to sleep too quickly
     delay(3000);
 
     Log::init(LOG_LEVEL_DEBUG);
     Log::info("Wiicon Remote Project - Starting setup...");
+
+    LedManager::signalStartup();
 
     initSleepManager();
     initLittleFS();
@@ -78,25 +84,30 @@ void setup() {
 
         if (!initBMI160()) {
             Log::warning("Warning: failed to init BMI160 (I2C read/write). Check wiring and I2C address.");
+            LedManager::signalErrorSensor();
         } else {
             Log::info("BMI160 init attempted (check chip id above).\n");
             autoCalibrateAccelerometer();
+            LedManager::signalSuccess();
         }
 
         Log::info("Starting gyroscope auto-calibration. Keep the device stationary...");
 
         if (!calibrateGyro(CALIB_SAMPLES, CALIB_DELAY_MS)) {
             Log::error("Gyroscope calibration failed (I2C reads). Continuing without bias correction.");
+            LedManager::signalErrorSensor();
         } else {
             float mappedBias[3];
             for (int i = 0; i < 3; ++i) mappedBias[i] = gyroBiasRaw[gyroMap[i]] * (float)gyroSign[i];
 
             Log::info("Gyro raw biases (deg/s): %.4f, %.4f, %.4f", gyroBiasRaw[0], gyroBiasRaw[1], gyroBiasRaw[2]);
             Log::info("Gyro mapped biases (deg/s): %.4f, %.4f, %.4f", mappedBias[0], mappedBias[1], mappedBias[2]);
+            LedManager::signalSuccess();
         }
     }
 
     lastTime = micros();
+    LedManager::signalSuccess();
 }
 
 void loop() {
