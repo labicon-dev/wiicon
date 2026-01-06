@@ -53,8 +53,9 @@ bool OSCManager::begin() {
         return false;
     }
 
-    _initialized = true;
-    Log::info("OSC initialized -> %s:%d", OSC_TARGET_IP, OSC_TARGET_PORT);
+    _initialized       = true;
+    IPAddress targetIP = getTargetIP();
+    Log::info("OSC initialized -> %s:%d", targetIP.toString().c_str(), OSC_TARGET_PORT);
     return true;
 }
 
@@ -80,8 +81,7 @@ void OSCManager::sendFloat(const char* address, float value) {
     writeOSCString(",f");
     writeOSCFloat(value);
 
-    IPAddress targetIP;
-    targetIP.fromString(OSC_TARGET_IP);
+    IPAddress targetIP   = getTargetIP();
 
     _udp.beginPacket(targetIP, OSC_TARGET_PORT);
     _udp.write(_buffer, _bufferIndex);
@@ -99,18 +99,7 @@ void OSCManager::sendFloat3(const char* address, float v1, float v2, float v3) {
     writeOSCFloat(v2);
     writeOSCFloat(v3);
 
-    IPAddress targetIP;
-    String    configIP = wifiManager.getOscIP();
-
-    if (configIP.length() > 0) {
-        targetIP.fromString(configIP.c_str());
-    } else {
-        IPAddress localIP = WiFi.localIP();
-        IPAddress subnet  = WiFi.subnetMask();
-
-        targetIP = IPAddress(localIP[0] | ~subnet[0], localIP[1] | ~subnet[1], localIP[2] | ~subnet[2],
-                             localIP[3] | ~subnet[3]);
-    }
+    IPAddress targetIP   = getTargetIP();
 
     _udp.beginPacket(targetIP, OSC_TARGET_PORT);
     _udp.write(_buffer, _bufferIndex);
@@ -145,5 +134,21 @@ void OSCManager::writeOSCFloat(float value) {
 void OSCManager::padToFourBytes() {
     while (_bufferIndex % 4 != 0) {
         _buffer[_bufferIndex++] = '\0';
+    }
+}
+
+IPAddress OSCManager::getTargetIP() const {
+    String configIP = wifiManager.getOscIP();
+
+    if (configIP.length() > 0) {
+        IPAddress targetIP;
+        targetIP.fromString(configIP.c_str());
+        return targetIP;
+    } else {
+        IPAddress localIP = WiFi.localIP();
+        IPAddress subnet  = WiFi.subnetMask();
+
+        return IPAddress(localIP[0] | ~subnet[0], localIP[1] | ~subnet[1], localIP[2] | ~subnet[2],
+                         localIP[3] | ~subnet[3]);
     }
 }

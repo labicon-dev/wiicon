@@ -115,6 +115,13 @@ class OSCManager {
      */
     void padToFourBytes();
 
+    /**
+     * Get the target IP address for OSC messages
+     * Uses configured IP if available, otherwise calculates network broadcast address
+     * @return Target IP address
+     */
+    IPAddress getTargetIP() const;
+
     WiFiUDP _udp;         /**< UDP instance for OSC communication */
     bool    _initialized; /**< Whether the OSC manager is initialized */
     uint8_t _buffer[256]; /**< Buffer for the OSC message */

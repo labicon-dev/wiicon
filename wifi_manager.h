@@ -136,6 +136,8 @@ class WiFiManager {
 
     bool _isAPMode; /**< Whether the WiFi manager is in AP mode */
 
+    bool _shouldRestart = false; /**< Whether the WiFi manager should restart */
+
     /**
      * Path to the SSID file
      */

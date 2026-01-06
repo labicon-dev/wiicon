@@ -25,7 +25,7 @@ WiFiManager& WiFiManager::instance() {
     return instance;
 }
 
-WiFiManager::WiFiManager() : _localSubnet(255, 255, 255, 0), _server(80), _isAPMode(false) {}
+WiFiManager::WiFiManager() : _localSubnet(255, 255, 255, 0), _server(80), _isAPMode(false), _shouldRestart(false) {}
 
 void WiFiManager::begin() {
     loadCredentials();
@@ -42,6 +42,12 @@ void WiFiManager::loop() {
     if (_isAPMode) {
         _dnsServer.processNextRequest();
         LedManager::signalAPMode();
+    }
+
+    if (_shouldRestart) {
+        Log::info("Restarting in 2 seconds...");
+        delay(DELAY_BEFORE_RESTART_MS * 2);
+        ESP.restart();
     }
 }
 
@@ -211,8 +217,7 @@ void WiFiManager::setupWebServer() {
         }
 
         request->send(200, "text/plain", "Credentials saved. Restarting...");
-        delay(2000);
-        ESP.restart();
+        _shouldRestart = true;
     });
 
     // Static files
