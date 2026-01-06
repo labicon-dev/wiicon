@@ -6,11 +6,28 @@
  * @date        2025
  * @version     1.0.0
  *
+ * @see         An efficient orientation filter for inertial and inertial/magnetic sensor arrays:
+ *              https://x-io.co.uk/downloads/madgwick_internal_report.pdf
+ * 
  * ========================================================================================
- *
- * MIT License
- * Copyright (c) 2025 Wiicon Remote Contributors
- *
+ * DERIVED WORK NOTICE
+ * ========================================================================================
+ * 
+ * This code is based on the Sebastian Madgwick's internal report:
+ * Copyright (c) 2011 Sebastian Madgwick
+ * 
+ * It is adapted directly from "Appendix A: IMU filter implementation optimised in C"
+ * of Sebastian Madgwick's internal report.
+ * 
+ * Copyright (c) 2025 Wiicon Remote Contributors (this implementation)
+ * 
+ * ========================================================================================
+ * LICENSE (MIT)
+ * ========================================================================================
+ * 
+ * Copyright (c) 2011 Sebastian Madgwick (Original implementation)
+ * Copyright (c) 2025 Wiicon Remote Contributors (this implementation)
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -29,6 +46,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
+ * SPDX-License-Identifier: MIT
+ *
  * ========================================================================================
  */
 
@@ -36,6 +55,8 @@
 #define MADGWICK_H
 
 #include <Arduino.h>
+
+#include "math.h"
 
 extern volatile float beta;       /**< Filter gain */
 extern float          sampleFreq; /**< Estimated sampling frequency (Hz) */
