@@ -1,6 +1,6 @@
 /**
  * @file        actions.cpp
- * @brief       Implementation of the actions for the Wiicon Remote project
+ * @brief       Implementation of the actions for the WiiCon Remote project
  *
  * @author      See AUTHORS file for full list of contributors
  * @date        2025
@@ -9,7 +9,7 @@
  * ========================================================================================
  *
  * MIT License
- * Copyright (c) 2025 Wiicon Remote Contributors
+ * Copyright (c) 2025 WiiCon Remote Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,13 +34,11 @@
 
 #include "actions.h"
 
-DataMode dataMode = DataMode::FILTERED;
-
 void actionToggleDataMode() {
     dataMode = dataMode == DataMode::RAW ? DataMode::FILTERED : DataMode::RAW;
     Log::info("Data mode toggled to %s", dataMode == DataMode::RAW ? "RAW" : "FILTERED");
     LedManager::setColor(0, 0, 1);
-    delay(200);
+    delay(DELAY_LED_FEEDBACK_MS);
     LedManager::off();
 }
 
@@ -58,7 +56,7 @@ void actionResetWifiConfig() {
     Log::warning("Resetting WiFi configuration... This will reboot the device.");
     WiFiManager::instance().clearCredentials();
     LedManager::signalErrorGeneral();
-    delay(1000);
+    delay(DELAY_BEFORE_RESTART_MS);
     ESP.restart();
 }
 

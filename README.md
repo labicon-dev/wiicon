@@ -78,12 +78,12 @@ The device transmits data via UDP to the configured target IP (default port: `90
 
 ### Address Patterns
 
-- **Euler Angles:** `/wiicon/euler`
+- **Euler Angles:** `/wiicon/euler` (Filtered Mode)
   - Arguments: `float roll`, `float pitch`, `float yaw` (Degrees)
-- **Raw Accelerometer:** `/wiicon/accel` (Only in Raw Mode)
-  - Arguments: `float x`, `float y`, `float z` (g-force)
-- **Raw Gyroscope:** `/wiicon/gyro` (Only in Raw Mode)
-  - Arguments: `float x`, `float y`, `float z` (deg/s)
+- **Raw Accelerometer:** `/wiicon/accel` (Raw Mode only)
+  - Arguments: `float x`, `float y`, `float z` (g-force, physical units)
+- **Raw Gyroscope:** `/wiicon/gyro` (Raw Mode only)
+  - Arguments: `float x`, `float y`, `float z` (deg/s, physical units with bias correction applied)
 
 ## Installation and Configuration
 

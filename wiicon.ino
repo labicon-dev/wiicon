@@ -1,6 +1,6 @@
 /**
  * @file        wiicon.ino
- * @brief       Main file for the Wiicon Remote project
+ * @brief       Main file for the WiiCon Remote project
  *
  * @details     Includes functions for reading sensor data, applying Madgwick filter
  *              and sending Euler angles via Serial in CSV format: R,P,Y
@@ -12,7 +12,7 @@
  * ========================================================================================
  *
  * MIT License
- * Copyright (c) 2025 Wiicon Remote Contributors
+ * Copyright (c) 2025 WiiCon Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,11 @@
 
 unsigned long lastTime = 0;
 
+int accelMap[3]  = {0, 1, 2};
+int accelSign[3] = {1, 1, 1};
+int gyroMap[3]   = {0, 1, 2};
+int gyroSign[3]  = {1, 1, 1};
+
 void setup() {
     Serial.begin(SERIAL_BAUD);
 
@@ -51,11 +56,10 @@ void setup() {
     ButtonManager::onTripleClick = actionResetWifiConfig;
     ButtonManager::onLongPress   = actionSleep;
 
-    // Safety delay so esp doesn't go to sleep too quickly
-    delay(3000);
+    delay(DELAY_STARTUP_SAFETY_MS);
 
     Log::init(LOG_LEVEL_DEBUG);
-    Log::info("Wiicon Remote Project - Starting setup...");
+    Log::info("WiiCon Remote Project - Starting setup...");
 
     initSleepManager();
     initLittleFS();
@@ -109,5 +113,5 @@ void loop() {
         sendEulerAngles();
     }
 
-    delay(5);
+    yield();
 }

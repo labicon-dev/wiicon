@@ -28,9 +28,9 @@ void loop();
 
 extern unsigned long lastTime;
 
-int accelMap[3]  = {0, 1, 2}; /**< Accelerometer map */
-int accelSign[3] = {1, 1, 1}; /**< Accelerometer sign */
-int gyroMap[3]   = {0, 1, 2}; /**< Gyroscope map */
-int gyroSign[3]  = {1, 1, 1}; /**< Gyroscope sign */
+extern int accelMap[3];  /**< Accelerometer map */
+extern int accelSign[3]; /**< Accelerometer sign */
+extern int gyroMap[3];   /**< Gyroscope map */
+extern int gyroSign[3]; /**< Gyroscope sign */
 
 #endif  // WIICON_H

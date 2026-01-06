@@ -41,6 +41,9 @@
 
 const uint32_t SERIAL_BAUD = 115200;
 
+// DATA MODE
+#define DATA_SERIAL_LOG 0
+
 // BUTTON MANAGER
 const gpio_num_t BUTTON_PIN = GPIO_NUM_3;
 
@@ -52,6 +55,11 @@ enum class DataMode { RAW, FILTERED };
 
 // SLEEP MANAGER
 const int SLEEP_DEBOUNCE_MS = 1000;
+
+// TIMING CONSTANTS
+const int DELAY_LED_FEEDBACK_MS   = 200;  /**< LED feedback duration after mode toggle */
+const int DELAY_BEFORE_RESTART_MS = 1000; /**< Delay before device restart */
+const int DELAY_STARTUP_SAFETY_MS = 3000; /**< Safety delay at startup to prevent immediate sleep */
 
 // LED STATUS INDICATOR
 const int  LED_PIN_R            = 18;

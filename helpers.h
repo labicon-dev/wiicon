@@ -1,6 +1,6 @@
 /**
  * @file        helpers.h
- * @brief       Helper functions for the Wiicon Remote project
+ * @brief       Helper functions for the WiiCon Remote project
  *
  * @author      See AUTHORS file for full list of contributors
  * @date        2025
@@ -9,7 +9,7 @@
  * ========================================================================================
  *
  * MIT License
- * Copyright (c) 2025 Wiicon Remote Contributors
+ * Copyright (c) 2025 WiiCon Remote Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,14 +39,13 @@
 #include <FS.h>
 #include <LittleFS.h>
 
+#include "actions.h"
 #include "bmi160.h"
 #include "config.h"
 #include "led_manager.h"
 #include "logger.h"
 #include "madgwick.h"
 #include "osc_manager.h"
-
-extern DataMode dataMode; /**< Data mode */
 
 /**
  * Sends Euler angles via Serial

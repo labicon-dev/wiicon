@@ -89,18 +89,19 @@ void sendEulerAngles() {
     float outYaw  = yaw;
 #endif
 
-    // Send via Serial (CSV: roll,pitch,yaw)
-    // Serial.print(outRoll, 2);
-    // Serial.print(',');
-    // Serial.print(pitch, 2);
-    // Serial.print(',');
-    // Serial.println(outYaw, 2);
+#if DATA_SERIAL_LOG
+    Serial.print(outRoll, 2);
+    Serial.print(',');
+    Serial.print(pitch, 2);
+    Serial.print(',');
+    Serial.println(outYaw, 2);
+#endif
 
     if (dataMode == DataMode::FILTERED) {
         oscManager.sendEulerAngles(outRoll, pitch, outYaw);
     } else {
-        oscManager.sendFloat3("/wiicon/accel", ax_raw, ay_raw, az_raw);
-        oscManager.sendFloat3("/wiicon/gyro", gx_raw, gy_raw, gz_raw);
+        oscManager.sendFloat3("/wiicon/accel", a_mapped[0], a_mapped[1], a_mapped[2]);
+        oscManager.sendFloat3("/wiicon/gyro", g_mapped[0], g_mapped[1], g_mapped[2]);
     }
 
     LedManager::signalOscReady();
