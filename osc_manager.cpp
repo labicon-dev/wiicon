@@ -100,7 +100,19 @@ void OSCManager::sendFloat3(const char* address, float v1, float v2, float v3) {
     writeOSCFloat(v3);
 
     IPAddress targetIP;
-    targetIP.fromString(OSC_TARGET_IP);
+    String    configIP = wifiManager.getOscIP();
+
+    if (configIP.length() > 0) {
+        targetIP.fromString(configIP.c_str());
+    } else {
+        IPAddress localIP = WiFi.localIP();
+        IPAddress subnet  = WiFi.subnetMask();
+
+        targetIP = IPAddress(localIP[0] | ~subnet[0], localIP[1] | ~subnet[1], localIP[2] | ~subnet[2],
+                             localIP[3] | ~subnet[3]);
+    }
+
+    Log::info("Sending OSC to: %s:%d", targetIP.toString().c_str(), OSC_TARGET_PORT);
 
     _udp.beginPacket(targetIP, OSC_TARGET_PORT);
     _udp.write(_buffer, _bufferIndex);

@@ -4,7 +4,9 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#include "actions.h"
 #include "bmi160.h"
+#include "button_manager.h"
 #include "config.h"
 #include "helpers.h"
 #include "led_manager.h"

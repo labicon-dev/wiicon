@@ -46,6 +46,8 @@
 #include "madgwick.h"
 #include "osc_manager.h"
 
+extern DataMode dataMode; /**< Data mode */
+
 /**
  * Sends Euler angles via Serial
  * Output format: roll,pitch,yaw (in degrees)

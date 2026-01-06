@@ -45,6 +45,12 @@ void setup() {
     LedManager::begin();
     LedManager::signalStartup();
 
+    ButtonManager::begin();
+    ButtonManager::onSingleClick = actionToggleDataMode;
+    ButtonManager::onDoubleClick = actionResetCalibration;
+    ButtonManager::onTripleClick = actionResetWifiConfig;
+    ButtonManager::onLongPress   = actionSleep;
+
     // Safety delay so esp doesn't go to sleep too quickly
     delay(3000);
 
@@ -80,8 +86,10 @@ void setup() {
         float mappedBias[3];
         for (int i = 0; i < 3; ++i) mappedBias[i] = gyroBiasRaw[gyroMap[i]] * (float)gyroSign[i];
 
-        Log::info("Gyroscope calibration successful. Raw biases (deg/s): %.4f, %.4f, %.4f", gyroBiasRaw[0], gyroBiasRaw[1], gyroBiasRaw[2]);
-        Log::info("Gyroscope calibration successful. Mapped biases (deg/s): %.4f, %.4f, %.4f", mappedBias[0], mappedBias[1], mappedBias[2]);
+        Log::info("Gyroscope calibration successful. Raw biases (deg/s): %.4f, %.4f, %.4f", gyroBiasRaw[0],
+                  gyroBiasRaw[1], gyroBiasRaw[2]);
+        Log::info("Gyroscope calibration successful. Mapped biases (deg/s): %.4f, %.4f, %.4f", mappedBias[0],
+                  mappedBias[1], mappedBias[2]);
         LedManager::signalSuccess();
     }
 
@@ -90,22 +98,16 @@ void setup() {
 
 void loop() {
     wifiManager.loop();
-
-    if (isWakeButtonPressed()) {
-        Log::info("Sleep button detected! Sleeping in %d ms...", SLEEP_DEBOUNCE_MS);
-        delay(SLEEP_DEBOUNCE_MS);
-        goToSleep();
-    }
+    ButtonManager::loop();
 
     unsigned long now = micros();
     float         dt  = (now - lastTime) / 1000000.0f;
-    if (dt <= 0) return;
+    if (dt > 0) {
+        float measuredHz = 1.0f / dt;
+        sampleFreq       = 0.95f * sampleFreq + 0.05f * measuredHz;
+        lastTime         = now;
+        sendEulerAngles();
+    }
 
-    float measuredHz = 1.0f / dt;
-    sampleFreq       = 0.95f * sampleFreq + 0.05f * measuredHz;
-    lastTime         = now;
-
-    sendEulerAngles();
-
-    delay(10);
+    delay(5);
 }

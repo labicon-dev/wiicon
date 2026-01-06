@@ -90,14 +90,19 @@ void sendEulerAngles() {
 #endif
 
     // Send via Serial (CSV: roll,pitch,yaw)
-    Serial.print(outRoll, 2);
-    Serial.print(',');
-    Serial.print(pitch, 2);
-    Serial.print(',');
-    Serial.println(outYaw, 2);
+    // Serial.print(outRoll, 2);
+    // Serial.print(',');
+    // Serial.print(pitch, 2);
+    // Serial.print(',');
+    // Serial.println(outYaw, 2);
 
-    // Send via OSC
-    oscManager.sendEulerAngles(outRoll, pitch, outYaw);
+    if (dataMode == DataMode::FILTERED) {
+        oscManager.sendEulerAngles(outRoll, pitch, outYaw);
+    } else {
+        oscManager.sendFloat3("/wiicon/accel", ax_raw, ay_raw, az_raw);
+        oscManager.sendFloat3("/wiicon/gyro", gx_raw, gy_raw, gz_raw);
+    }
+
     LedManager::signalOscReady();
 }
 
@@ -115,6 +120,7 @@ String readFile(fs::FS& fs, const char* path) {
 
     if (!file || file.isDirectory()) {
         Log::error("Failed to open file: %s", path);
+        LedManager::signalErrorGeneral();
         return "";
     }
 
@@ -134,6 +140,7 @@ void writeFile(fs::FS& fs, const char* path, const char* message) {
     File file = fs.open(path, FILE_WRITE);
     if (!file) {
         Log::error("Failed to open file for writing: %s", path);
+        LedManager::signalErrorGeneral();
         return;
     }
 
@@ -141,6 +148,7 @@ void writeFile(fs::FS& fs, const char* path, const char* message) {
         Log::debug("File written successfully: %s", path);
     } else {
         Log::error("Failed to write file: %s", path);
+        LedManager::signalErrorGeneral();
     }
 
     file.close();

@@ -64,6 +64,12 @@ class WiFiManager {
      */
     bool isConnected() const { return WiFi.status() == WL_CONNECTED; }
 
+    /**
+     * Get the OSC IP address
+     * @return OSC IP address
+     */
+    String getOscIP() const { return _oscIP; } /**< OSC IP address */
+
     WiFiManager(const WiFiManager&)            = delete; /**< Delete copy constructor */
     WiFiManager& operator=(const WiFiManager&) = delete; /**< Delete assignment operator */
 
@@ -119,6 +125,7 @@ class WiFiManager {
     String _password; /**< Password of the WiFi network */
     String _ip;       /**< IP address of the WiFi network */
     String _gateway;  /**< Gateway of the WiFi network */
+    String _oscIP;    /**< OSC IP address */
 
     IPAddress _localIP;      /**< Local IP address */
     IPAddress _localGateway; /**< Local gateway */
@@ -150,6 +157,11 @@ class WiFiManager {
     static constexpr const char* GATEWAY_PATH = "/gateway.txt";
 
     /**
+     * Path to the OSC IP file
+     */
+    static constexpr const char* OSC_IP_PATH = "/osc_ip.txt";
+
+    /**
      * Parameter for the SSID
      */
     static constexpr const char* PARAM_SSID = "ssid";
@@ -168,6 +180,11 @@ class WiFiManager {
      * Parameter for the gateway
      */
     static constexpr const char* PARAM_GATEWAY = "gateway";
+
+    /**
+     * Parameter for the OSC IP
+     */
+    static constexpr const char* PARAM_OSC_IP = "osc_ip";
 
     /**
      * Port for the DNS server

@@ -45,7 +45,7 @@
 #include "esp_sleep.h"
 #include "logger.h"
 
-#define WAKE_BITMASK (1ULL << WAKE_PIN) /**< Wakeup bitmask for the wake pin */
+#define WAKE_BITMASK (1ULL << BUTTON_PIN) /**< Wakeup bitmask for the wake pin */
 
 /**
  * Initialize the sleep manager

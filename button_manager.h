@@ -1,6 +1,6 @@
 /**
- * @file        config.h
- * @brief       Configuration file for the Wiicon Remote project
+ * @file        button_manager.h
+ * @brief       Button Manager for the Wiicon Remote project
  *
  * @author      See AUTHORS file for full list of contributors
  * @date        2025
@@ -32,49 +32,56 @@
  * ========================================================================================
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef BUTTON_MANAGER_H
+#define BUTTON_MANAGER_H
 
 #include <Arduino.h>
 
-#include "driver/gpio.h"
+#include "config.h"
+#include "logger.h"
 
-const uint32_t SERIAL_BAUD = 115200;
+class ButtonManager {
+   public:
+    /**
+     * Initialize the button manager
+     */
+    static void begin();
 
-// BUTTON MANAGER
-const gpio_num_t BUTTON_PIN = GPIO_NUM_3;
+    /**
+     * Loop the button manager
+     */
+    static void loop();
 
-// BMI160 SENSOR
-const int     SDA_PIN     = 4;
-const int     SCL_PIN     = 2;
-const uint8_t BMI160_ADDR = 0x68;
-enum class DataMode { RAW, FILTERED };
+    /**
+     * Callback for single click
+     */
+    static void (*onSingleClick)();
 
-// SLEEP MANAGER
-const int SLEEP_DEBOUNCE_MS = 1000;
+    /**
+     * Callback for double click
+     */
+    static void (*onDoubleClick)();
 
-// LED STATUS INDICATOR
-const int  LED_PIN_R            = 18;
-const int  LED_PIN_G            = 19;
-const int  LED_PIN_B            = 20;
-const bool LED_RGB_COMMON_ANODE = false;
+    /**
+     * Callback for triple click
+     */
+    static void (*onTripleClick)();
 
-// OSC MANAGER
-constexpr const char* OSC_TARGET_IP     = "192.168.1.255";
-constexpr int         OSC_TARGET_PORT   = 9000;
-constexpr const char* OSC_ADDRESS_EULER = "/wiicon/euler";
+    /**
+     * Callback for long press
+     */
+    static void (*onLongPress)();
 
-// DATA MAPPING
-#define SWAP_ROLL_YAW 0
+   private:
+    static unsigned long _lastStateChange;  /**< Last state change time */
+    static unsigned long _lastClickTime;    /**< Last click time */
+    static bool          _lastState;        /**< Last state */
+    static int           _clickCount;       /**< Click count */
+    static bool          _longPressHandled; /**< Long press handled */
 
-extern int accelMap[3];
-extern int accelSign[3];
-extern int gyroMap[3];
-extern int gyroSign[3];
+    static const int DEBOUNCE_TIME   = 50;   /**< Debounce time */
+    static const int CLICK_TIMEOUT   = 400;  /**< Click timeout */
+    static const int LONG_PRESS_TIME = 3000; /**< Long press time */
+};
 
-const float ACC_LSB_PER_G   = 16384.0f; /**< ±2g => LSB/g ≈ 16384 */
-const float GYR_LSB_PER_DPS = 16.4f;    /**< ±2000 dps => LSB/(deg/s) ≈ 16.4 */
-const int   CALIB_SAMPLES   = 200;
-const int   CALIB_DELAY_MS  = 5;
-
-#endif  // CONFIG_H
+#endif

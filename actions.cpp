@@ -1,6 +1,6 @@
 /**
- * @file        config.h
- * @brief       Configuration file for the Wiicon Remote project
+ * @file        actions.cpp
+ * @brief       Implementation of the actions for the Wiicon Remote project
  *
  * @author      See AUTHORS file for full list of contributors
  * @date        2025
@@ -32,49 +32,38 @@
  * ========================================================================================
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#include "actions.h"
 
-#include <Arduino.h>
+DataMode dataMode = DataMode::FILTERED;
 
-#include "driver/gpio.h"
+void actionToggleDataMode() {
+    dataMode = dataMode == DataMode::RAW ? DataMode::FILTERED : DataMode::RAW;
+    Log::info("Data mode toggled to %s", dataMode == DataMode::RAW ? "RAW" : "FILTERED");
+    LedManager::setColor(0, 0, 1);
+    delay(200);
+    LedManager::off();
+}
 
-const uint32_t SERIAL_BAUD = 115200;
+void actionResetCalibration() {
+    Log::info("Resetting calibration...");
+    LedManager::setColor(1, 1, 0);
+    if (calibrateGyro(CALIB_SAMPLES, CALIB_DELAY_MS)) {
+        LedManager::signalSuccess();
+    } else {
+        LedManager::signalErrorGeneral();
+    }
+}
 
-// BUTTON MANAGER
-const gpio_num_t BUTTON_PIN = GPIO_NUM_3;
+void actionResetWifiConfig() {
+    Log::warning("Resetting WiFi configuration... This will reboot the device.");
+    WiFiManager::instance().clearCredentials();
+    LedManager::signalErrorGeneral();
+    delay(1000);
+    ESP.restart();
+}
 
-// BMI160 SENSOR
-const int     SDA_PIN     = 4;
-const int     SCL_PIN     = 2;
-const uint8_t BMI160_ADDR = 0x68;
-enum class DataMode { RAW, FILTERED };
-
-// SLEEP MANAGER
-const int SLEEP_DEBOUNCE_MS = 1000;
-
-// LED STATUS INDICATOR
-const int  LED_PIN_R            = 18;
-const int  LED_PIN_G            = 19;
-const int  LED_PIN_B            = 20;
-const bool LED_RGB_COMMON_ANODE = false;
-
-// OSC MANAGER
-constexpr const char* OSC_TARGET_IP     = "192.168.1.255";
-constexpr int         OSC_TARGET_PORT   = 9000;
-constexpr const char* OSC_ADDRESS_EULER = "/wiicon/euler";
-
-// DATA MAPPING
-#define SWAP_ROLL_YAW 0
-
-extern int accelMap[3];
-extern int accelSign[3];
-extern int gyroMap[3];
-extern int gyroSign[3];
-
-const float ACC_LSB_PER_G   = 16384.0f; /**< ±2g => LSB/g ≈ 16384 */
-const float GYR_LSB_PER_DPS = 16.4f;    /**< ±2000 dps => LSB/(deg/s) ≈ 16.4 */
-const int   CALIB_SAMPLES   = 200;
-const int   CALIB_DELAY_MS  = 5;
-
-#endif  // CONFIG_H
+void actionSleep() {
+    Log::info("Entering deep sleep...");
+    LedManager::off();
+    goToSleep();
+}

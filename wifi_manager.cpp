@@ -49,6 +49,7 @@ void WiFiManager::clearCredentials() {
     writeFile(LittleFS, PASSWORD_PATH, "");
     writeFile(LittleFS, IP_PATH, "");
     writeFile(LittleFS, GATEWAY_PATH, "");
+    writeFile(LittleFS, OSC_IP_PATH, "");
     Log::info("WiFi credentials cleared");
 }
 
@@ -57,6 +58,7 @@ void WiFiManager::loadCredentials() {
     _password = readFile(LittleFS, PASSWORD_PATH);
     _ip       = readFile(LittleFS, IP_PATH);
     _gateway  = readFile(LittleFS, GATEWAY_PATH);
+    _oscIP    = readFile(LittleFS, OSC_IP_PATH);
 }
 
 void WiFiManager::saveCredential(const char* path, const String& value) { writeFile(LittleFS, path, value.c_str()); }
@@ -199,6 +201,10 @@ void WiFiManager::setupWebServer() {
                 _gateway = p->value();
                 saveCredential(GATEWAY_PATH, _gateway);
                 Log::info("Gateway saved: %s", _gateway.c_str());
+            } else if (p->name() == PARAM_OSC_IP) {
+                _oscIP = p->value();
+                saveCredential(OSC_IP_PATH, _oscIP);
+                Log::info("OSC IP saved: %s", _oscIP.c_str());
             }
         }
 

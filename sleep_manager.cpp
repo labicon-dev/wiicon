@@ -35,19 +35,36 @@
 #include "sleep_manager.h"
 
 void initSleepManager() {
-    pinMode(WAKE_PIN, INPUT);
+    gpio_config_t io_conf = {};
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_INPUT;
+    io_conf.pin_bit_mask = (1ULL << BUTTON_PIN);
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+    gpio_config(&io_conf);
 
-    Log::info("Sleep manager initialized (wake pin: GPIO%d)", WAKE_PIN);
+    Log::info("Sleep manager initialized on LP GPIO %d", BUTTON_PIN);
 
     checkWakeupCause();
 }
 
 void goToSleep() {
-    Log::info("Entering Deep Sleep...");
+    Log::info("Preparing for Deep Sleep...");
+
+    if (digitalRead(BUTTON_PIN) == LOW) {
+        Log::info("Release the button to sleep...");
+        while (digitalRead(BUTTON_PIN) == LOW) {
+            delay(100);
+        }
+        delay(200);
+    }
+
     Serial.flush();
 
-    esp_sleep_enable_ext1_wakeup(WAKE_BITMASK, ESP_EXT1_WAKEUP_ANY_HIGH);
+    esp_deep_sleep_enable_gpio_wakeup(1ULL << BUTTON_PIN, ESP_GPIO_WAKEUP_GPIO_LOW);
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+
+    Log::info("Good night! :)");
     esp_deep_sleep_start();
 }
 
@@ -55,8 +72,9 @@ bool checkWakeupCause() {
     esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
 
     switch (cause) {
+        case ESP_SLEEP_WAKEUP_GPIO:
         case ESP_SLEEP_WAKEUP_EXT1:
-            Log::info("Wakeup cause: Button pressed (EXT1)");
+            Log::info("Wakeup cause: Button pressed");
             return true;
 
         case ESP_SLEEP_WAKEUP_TIMER:
@@ -70,4 +88,4 @@ bool checkWakeupCause() {
     }
 }
 
-bool isWakeButtonPressed() { return digitalRead(WAKE_PIN) == HIGH; }
+bool isWakeButtonPressed() { return digitalRead(BUTTON_PIN) == LOW; }
