@@ -85,6 +85,30 @@ void LedManager::signalWifiSearch() {
     }
 }
 
+void LedManager::signalWifiConnecting() {
+    static unsigned long lastToggle = 0;
+    const int            interval   = 500;
+
+    if (millis() - lastToggle > interval) {
+        lastToggle = millis();
+        static bool state = false;
+        state = !state;
+        setColor(state, state, false);
+    }
+}
+
+void LedManager::signalAPMode() {
+    static unsigned long lastToggle = 0;
+    const int            interval   = 500;
+
+    if (millis() - lastToggle > interval) {
+        lastToggle = millis();
+        static bool state = false;
+        state = !state;
+        setColor(state, false, state);
+    }
+}
+
 void LedManager::signalSuccess() {
     setColor(false, true, false);
     delay(2000);

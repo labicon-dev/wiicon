@@ -112,8 +112,6 @@ void OSCManager::sendFloat3(const char* address, float v1, float v2, float v3) {
                              localIP[3] | ~subnet[3]);
     }
 
-    Log::debug("Sending OSC to: %s:%d", targetIP.toString().c_str(), OSC_TARGET_PORT);
-
     _udp.beginPacket(targetIP, OSC_TARGET_PORT);
     _udp.write(_buffer, _bufferIndex);
     _udp.endPacket();

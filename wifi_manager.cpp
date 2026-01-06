@@ -41,6 +41,7 @@ void WiFiManager::begin() {
 void WiFiManager::loop() {
     if (_isAPMode) {
         _dnsServer.processNextRequest();
+        LedManager::signalAPMode();
     }
 }
 
@@ -96,7 +97,7 @@ bool WiFiManager::connect() {
             LedManager::signalErrorGeneral();
             return false;
         }
-        LedManager::signalWifiSearch();
+        LedManager::signalWifiConnecting();
         delay(10);
     }
 
@@ -114,7 +115,7 @@ void WiFiManager::startAccessPoint() {
     Log::info("Starting WiFi Manager AP...");
 
     _isAPMode = true;
-    WiFi.softAP("WiIcon Setup", NULL, 1, false, 1);
+    WiFi.softAP("WiiCon Setup", NULL, 1, false, 1);
 
     IPAddress apIP = WiFi.softAPIP();
     Log::info("WiFi Manager AP started. IP: %s", apIP.toString().c_str());
@@ -124,6 +125,7 @@ void WiFiManager::startAccessPoint() {
 
     _server.begin();
     Log::info("WiFi Manager server started");
+    Log::info("AP Mode active");
 }
 
 void WiFiManager::setupCaptivePortal() {

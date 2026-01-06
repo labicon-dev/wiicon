@@ -34,6 +34,8 @@
 
 #include "actions.h"
 
+DataMode dataMode = DataMode::FILTERED;
+
 void actionToggleDataMode() {
     dataMode = dataMode == DataMode::RAW ? DataMode::FILTERED : DataMode::RAW;
     Log::info("Data mode toggled to %s", dataMode == DataMode::RAW ? "RAW" : "FILTERED");

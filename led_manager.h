@@ -66,6 +66,16 @@ class LedManager {
     static void signalWifiSearch();
 
     /**
+     * Signal WiFi connecting
+     */
+    static void signalWifiConnecting();
+
+    /**
+     * Signal AP mode
+     */
+    static void signalAPMode();
+
+    /**
      * Signal the success of the operation
      */
     static void signalSuccess();
