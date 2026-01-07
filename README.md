@@ -107,7 +107,7 @@ The device transmits data via UDP to the configured target IP (default port: `90
 ### Third-Party Code
 
 - **BMI160 Driver:** Derived from [Intel's BMI160-Arduino library](https://github.com/arduino/ArduinoCore-arc32/blob/master/libraries/CurieIMU/src/BMI160.h) and [Jeff Rowberg's I2Cdev library](https://github.com/jrowberg/i2cdevlib)
-- **Madgwick AHRS Filter:** Based on the algorithm by Sebastian Madgwick
+- **Madgwick AHRS Filter:** Based on the algorithm by [Sebastian Madgwick](https://x-io.co.uk/downloads/madgwick_internal_report.pdf).
 
 ## License
 
